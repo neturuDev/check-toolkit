@@ -1,6 +1,5 @@
 {
   "name": "is-ts",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "module": "./dist/is-ts.js",
