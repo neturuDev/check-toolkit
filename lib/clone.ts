@@ -1,4 +1,9 @@
 /**
+ * @license MIT
+ * Copyright (c) 2025 Volodymyr Cherevchuk
+ */
+
+/**
  * Shallow clone (like lodash.clone)
  */
 export const clone = <T>(value: T): T => {

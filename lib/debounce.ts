@@ -1,3 +1,8 @@
+/**
+ * @license MIT
+ * Copyright (c) 2025 Volodymyr Cherevchuk
+ */
+
 export interface DebounceOptions {
   leading?: boolean;
   trailing?: boolean;

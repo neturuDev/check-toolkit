@@ -1,3 +1,8 @@
+/**
+ * @license MIT
+ * Copyright (c) 2025 Volodymyr Cherevchuk
+ */
+
 import { OBJECT_TYPES } from "./constants";
 
 export const getTag = (v: unknown): string => {
