@@ -1,8 +1,3 @@
-/**
- * @license MIT
- * Copyright (c) 2025 Volodymyr Cherevchuk
- */
-
 import { OBJECT_TYPES } from "./constants";
 import { baseIsMatch } from "./common";
 
