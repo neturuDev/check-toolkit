@@ -1,9 +1,4 @@
 /**
- * @license MIT
- * Copyright (c) 2025 Volodymyr Cherevchuk
- */
-
-/**
  * Creates an array of unique values from `array` not included in the other given arrays.
  * Uses SameValueZero (like `===` but treats NaN as equal to NaN).
  */

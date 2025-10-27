@@ -1,8 +1,3 @@
-/**
- * @license MIT
- * Copyright (c) 2025 Volodymyr Cherevchuk
- */
-
 export {
   isSymbol,
   isArray,

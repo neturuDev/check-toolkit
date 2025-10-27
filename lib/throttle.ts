@@ -1,8 +1,3 @@
-/**
- * @license MIT
- * Copyright (c) 2025 Volodymyr Cherevchuk
- */
-
 import { debounce, type DebouncedFunction } from "./debounce";
 
 export interface ThrottleOptions {
