@@ -1,5 +1,5 @@
 {
-  "name": "is-ts",
+  "name": "@neturu/is-ts",
   "version": "0.0.0",
   "type": "module",
   "module": "./dist/is-ts.js",
