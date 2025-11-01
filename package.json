@@ -1,8 +1,8 @@
 {
-  "name": "is-toolkit",
+  "name": "check-toolkit",
   "version": "0.0.0",
   "type": "module",
-  "module": "./dist/is-toolkit.js",
+  "module": "./dist/check-toolkit.js",
   "author": "Volodymyr Cherevchuk",
   "license": "MIT",
   "files": [
@@ -11,7 +11,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/is-toolkit.js",
+      "import": "./dist/check-toolkit.js",
       "types": "./dist/index.d.ts"
     }
   },
