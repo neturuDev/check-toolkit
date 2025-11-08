@@ -5,6 +5,14 @@
   "module": "./dist/check-toolkit.js",
   "author": "Volodymyr Cherevchuk",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neturuDev/check-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neturuDev/check-toolkit/issues"
+  },
+  "homepage": "https://github.com/neturuDev/check-toolkit#readme",
   "files": [
     "dist"
   ],
