@@ -73,10 +73,10 @@ describe("base utilities", () => {
   });
 
   it("isFunction detects functions", () => {
-    expect(!!isFunction(function () {})).toBe(true);
-    expect(!!isFunction(() => {})).toBe(true);
-    expect(!!isFunction({})).toBe(false);
-    expect(!!isFunction(null)).toBe(false);
+    expect(Boolean(isFunction(function () {}))).toBe(true);
+    expect(Boolean(isFunction(() => {}))).toBe(true);
+    expect(Boolean(isFunction({}))).toBe(false);
+    expect(Boolean(isFunction(null))).toBe(false);
   });
 
   it("isNumber and isString", () => {

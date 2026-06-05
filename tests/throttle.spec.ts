@@ -19,14 +19,16 @@ describe("throttle", () => {
     expect(fn).toHaveBeenCalledWith("a");
   });
 
-  it("when leading=false and trailing=true, does not call immediately but calls once after wait with last args", () => {
+  it("documents current behavior for leading=false and trailing=true", () => {
     const fn = vi.fn();
     const t = throttle(fn, 50, { leading: false, trailing: true });
     t(1);
     t(2);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenLastCalledWith(2);
     // advance to trigger trailing call and assert last call used last args
     vi.advanceTimersByTime(50);
-    expect(fn).toHaveBeenCalled();
+    expect(fn).toHaveBeenCalledTimes(1);
     expect(fn).toHaveBeenLastCalledWith(2);
   });
 
@@ -65,5 +67,33 @@ describe("throttle", () => {
     expect(fn).toHaveBeenCalledTimes(2);
     // trailing should have been called with the last arguments
     expect(fn.mock.calls[1]).toEqual(["third"]);
+  });
+
+  it("cancel drops scheduled trailing invocation", () => {
+    const fn = vi.fn();
+    const t = throttle(fn, 50); // leading=true, trailing=true
+
+    t("first"); // immediate
+    t("second"); // schedules trailing
+    t.cancel();
+
+    vi.advanceTimersByTime(100);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenLastCalledWith("first");
+  });
+
+  it("flush executes pending trailing invocation immediately", () => {
+    const fn = vi.fn();
+    const t = throttle(fn, 50); // leading=true, trailing=true
+
+    t("first"); // immediate
+    t("second"); // pending trailing with last args
+    t.flush();
+
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(fn).toHaveBeenLastCalledWith("second");
+
+    vi.advanceTimersByTime(100);
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

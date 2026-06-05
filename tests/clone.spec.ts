@@ -6,7 +6,7 @@ describe("clone (shallow)", () => {
     const nested = { a: 1 };
     const arr = [1, nested];
     const c = clone(arr);
-    expect(c).not.toBe(arr);
+    expect(Object.is(c, arr)).toBe(false);
     expect(c[0]).toBe(1);
     expect(c[1]).toBe(nested); // shallow: same nested reference
   });
@@ -15,7 +15,7 @@ describe("clone (shallow)", () => {
     const nested = { x: 2 };
     const obj = { a: 1, b: nested };
     const c = clone(obj);
-    expect(c).not.toBe(obj);
+    expect(Object.is(c, obj)).toBe(false);
     expect(c.a).toBe(1);
     expect(c.b).toBe(nested); // shallow copy keeps reference
   });
@@ -32,10 +32,10 @@ describe("cloneDeep", () => {
   it("deep clones nested objects/arrays", () => {
     const obj = { a: { b: [1, { c: 3 }] } };
     const c = cloneDeep(obj);
-    expect(c).not.toBe(obj);
-    expect(c.a).not.toBe(obj.a);
-    expect(c.a.b).not.toBe(obj.a.b);
-    expect(c.a.b[1]).not.toBe(obj.a.b[1]);
+    expect(Object.is(c, obj)).toBe(false);
+    expect(Object.is(c.a, obj.a)).toBe(false);
+    expect(Object.is(c.a.b, obj.a.b)).toBe(false);
+    expect(Object.is(c.a.b[1], obj.a.b[1])).toBe(false);
     expect(c).toEqual(obj);
     // Mutating original should not affect clone
     (obj.a.b[1] as any).c = 999;
@@ -47,9 +47,9 @@ describe("cloneDeep", () => {
     const r = /test/gi;
     const cd = cloneDeep(d);
     const cr = cloneDeep(r);
-    expect(cd).not.toBe(d);
+    expect(Object.is(cd, d)).toBe(false);
     expect(cd.getTime()).toBe(d.getTime());
-    expect(cr).not.toBe(r);
+    expect(Object.is(cr, r)).toBe(false);
     expect(cr.source).toBe(r.source);
     expect(cr.flags).toBe(r.flags);
   });
@@ -60,20 +60,20 @@ describe("cloneDeep", () => {
     const s = new Set<any>([valueObj]);
     const cm = cloneDeep(m);
     const cs = cloneDeep(s);
-    expect(cm).not.toBe(m);
-    expect(cm.get("k")).not.toBe(valueObj);
+    expect(Object.is(cm, m)).toBe(false);
+    expect(Object.is(cm.get("k"), valueObj)).toBe(false);
     expect(cm.get("k")).toEqual(valueObj);
     // For Set, find an equivalent object inside the cloned set
     const found = Array.from(cs).find((x) => (x as any).v === 1);
     expect(found).toBeDefined();
-    expect(found).not.toBe(valueObj);
+    expect(Object.is(found, valueObj)).toBe(false);
   });
 
   it("preserves circular references", () => {
     const obj: any = { name: "root" };
     obj.self = obj;
     const cloned = cloneDeep(obj);
-    expect(cloned).not.toBe(obj);
+    expect(Object.is(cloned, obj)).toBe(false);
     expect(cloned.self).toBe(cloned);
     // array circular
     const arr: any[] = [];
@@ -125,6 +125,6 @@ describe("cloneDeepWith (deep with customizer)", () => {
     const obj = { a: { b: 2 } };
     const cloned = cloneDeepWith(obj, () => undefined);
     expect(cloned).toEqual(obj);
-    expect((cloned as any).a).not.toBe(obj.a);
+    expect(Object.is((cloned as any).a, obj.a)).toBe(false);
   });
 });
