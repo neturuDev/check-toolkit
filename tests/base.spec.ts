@@ -70,6 +70,11 @@ describe("base utilities", () => {
 
     expect(isNotNil(0)).toBe(true);
     expect(isNotNil(null)).toBe(false);
+
+    const maybeName: string | null | undefined = "alice";
+    if (isNotNil(maybeName)) {
+      expect(maybeName).toBe("alice");
+    }
   });
 
   it("isFunction detects functions", () => {
