@@ -25,7 +25,7 @@ export const isArray = Array.isArray;
 
 /**
  * isArrayLike
- * Check if `value` is isArrayLike.
+ * Check if `value` is array-like.
  *
  * @param {*} value to check
  * @return {Boolean} true if `value` is array-like, else false.
@@ -75,13 +75,15 @@ export const isNull = (value: unknown): value is null => {
 
 /**
  * isFunction
- * Check if `value` is Null.
+ * Check if `value` is a function.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is function, false otherwise
  * @api public
  */
-export const isFunction = (value: any): value is Function => {
+export const isFunction = (
+  value: unknown,
+): value is (...args: any[]) => any => {
   return typeof value === "function";
 };
 
@@ -103,7 +105,7 @@ export const isNumber = (value: any): value is number => {
 
 /**
  * isString
- * Check if `value` is Null.
+ * Check if `value` is a string.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is string, false otherwise
@@ -127,7 +129,7 @@ export const isUndefined = (value: unknown): value is undefined => {
 
 /**
  * isNotUndefined
- * Check if `value` is undefined.
+ * Check if `value` is not undefined.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is not undefined, false otherwise
@@ -157,7 +159,7 @@ export const isNil = (value: unknown): value is null | undefined => {
  * @return {Boolean} true if 'value' is not null or undefined, false otherwise
  * @api public
  */
-export const isNotNil = (value: unknown): boolean => {
+export const isNotNil = <T>(value: T): value is NonNullable<T> => {
   return !isNil(value);
 };
 
