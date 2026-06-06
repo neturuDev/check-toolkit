@@ -13,7 +13,7 @@ export interface DebouncedFunction<T extends (...args: any[]) => any> {
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait = 0,
-  options: DebounceOptions = {}
+  options: DebounceOptions = {},
 ): DebouncedFunction<T> {
   let timerId: ReturnType<typeof setTimeout> | undefined;
   let lastArgs: Parameters<T> | undefined;
@@ -23,6 +23,7 @@ export function debounce<T extends (...args: any[]) => any>(
   const leading = !!options.leading;
   const trailing = options.trailing !== false; // default true
   const maxWait = options.maxWait;
+  const maxing = maxWait !== undefined;
 
   function invoke(time: number) {
     lastInvokeTime = time;
@@ -37,6 +38,16 @@ export function debounce<T extends (...args: any[]) => any>(
     timerId = setTimeout(pending, ms);
   }
 
+  function remainingWait(time: number) {
+    const sinceLastCall = time - (lastCallTime as number);
+    const sinceLastInvoke = time - lastInvokeTime;
+    const timeWaiting = wait - sinceLastCall;
+
+    return maxing
+      ? Math.min(timeWaiting, (maxWait as number) - sinceLastInvoke)
+      : timeWaiting;
+  }
+
   function shouldInvoke(time: number) {
     if (lastCallTime === undefined) return true;
     const sinceLastCall = time - lastCallTime;
@@ -46,6 +57,15 @@ export function debounce<T extends (...args: any[]) => any>(
       sinceLastCall < 0 || // system clock moved backward
       (maxWait !== undefined && sinceLastInvoke >= maxWait)
     );
+  }
+
+  function leadingEdge(time: number) {
+    lastInvokeTime = time;
+    startTimer(timerExpired, wait);
+    if (leading) {
+      return invoke(time);
+    }
+    return undefined;
   }
 
   function trailingEdge(time: number) {
@@ -62,8 +82,7 @@ export function debounce<T extends (...args: any[]) => any>(
     if (shouldInvoke(now)) {
       return trailingEdge(now);
     }
-    const remaining = wait - (now - (lastCallTime as number));
-    startTimer(timerExpired, remaining);
+    startTimer(timerExpired, remainingWait(now));
   }
 
   function debounced(this: any, ...args: Parameters<T>) {
@@ -75,13 +94,9 @@ export function debounce<T extends (...args: any[]) => any>(
 
     if (isInvoking) {
       if (timerId === undefined) {
-        // Leading edge
-        if (leading) {
-          return invoke(now);
-        }
-        // Schedule a trailing invocation
-        startTimer(timerExpired, wait);
-      } else if (maxWait !== undefined) {
+        return leadingEdge(now);
+      }
+      if (maxing) {
         // Handle maxWait
         startTimer(timerExpired, wait);
         return invoke(now);
@@ -97,16 +112,13 @@ export function debounce<T extends (...args: any[]) => any>(
       clearTimeout(timerId);
       timerId = undefined;
     }
+    lastInvokeTime = 0;
     lastArgs = lastThis = lastCallTime = undefined;
   };
 
   debounced.flush = () => {
     if (timerId) {
-      const now = Date.now();
-      const result = invoke(now);
-      clearTimeout(timerId);
-      timerId = undefined;
-      return result;
+      return trailingEdge(Date.now());
     }
     return undefined;
   };

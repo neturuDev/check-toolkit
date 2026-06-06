@@ -16,7 +16,7 @@ describe("debounce", () => {
     const deb = debounce(fn, 100);
 
     deb("first");
-    expect(fn).not.toHaveBeenCalled();
+    expect(fn).toHaveBeenCalledTimes(0);
 
     // call again before wait; last args should be used
     vi.advanceTimersByTime(50);
@@ -47,7 +47,7 @@ describe("debounce", () => {
     expect(fn).toHaveBeenLastCalledWith("again");
   });
 
-  it("honors maxWait: forces invocation by maxWait even with frequent calls", () => {
+  it("honors maxWait and invokes with the latest arguments", () => {
     const fn = vi.fn();
     const deb = debounce(fn, 100, { maxWait: 200 });
 
@@ -63,8 +63,7 @@ describe("debounce", () => {
     // at 200ms since first call, maxWait should force invoke
     vi.advanceTimersByTime(50); // now t=200
     expect(fn).toHaveBeenCalledTimes(1);
-    // the implementation will use the lastArgs available at invoke
-    expect(fn).toHaveBeenCalledWith("t50");
+    expect(fn).toHaveBeenCalledWith("t150");
   });
 
   it("cancel prevents a scheduled invocation", () => {
@@ -74,6 +73,20 @@ describe("debounce", () => {
     deb("will-cancel");
     deb.cancel();
     vi.advanceTimersByTime(200);
-    expect(fn).not.toHaveBeenCalled();
+    expect(fn).toHaveBeenCalledTimes(0);
+  });
+
+  it("flush invokes pending call immediately and prevents duplicate trailing call", () => {
+    const fn = vi.fn();
+    const deb = debounce(fn, 100);
+
+    deb("flush-now");
+    deb.flush();
+
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenCalledWith("flush-now");
+
+    vi.advanceTimersByTime(200);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });

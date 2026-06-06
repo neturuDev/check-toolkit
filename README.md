@@ -64,6 +64,12 @@ console.log(isFunction(() => {})); // true
 - `debounce` - Creates a debounced function
 - `throttle` - Creates a throttled function
 
+## Module Organization
+
+- Internally, utility functions are grouped by domain in `lib/array.ts` and `lib/string.ts`.
+- `lib/helpers.ts` is kept as a compatibility re-export layer for existing deep imports.
+- Prefer importing from the package root (`check-toolkit`) rather than deep-importing internal files.
+
 ## Testing
 
 To run the test suite:

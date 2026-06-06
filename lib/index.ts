@@ -18,15 +18,9 @@ export {
   isMatch,
 } from "./base";
 
-export {
-  difference,
-  differenceBy,
-  differenceWith,
-  keyBy,
-  escape,
-  unescape,
-  escapeRegExp,
-} from "./helpers";
+export { difference, differenceBy, differenceWith, keyBy } from "./array";
+
+export { escape, unescape, escapeRegExp } from "./string";
 
 export { debounce } from "./debounce";
 export { throttle } from "./throttle";
