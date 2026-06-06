@@ -137,6 +137,27 @@ describe("base utilities", () => {
     expect(isEqual(A, B)).toBe(false);
   });
 
+  it("isEqual supports NaN, RegExp, Map, Set and cyclical structures", () => {
+    expect(isEqual(NaN, NaN)).toBe(true);
+    expect(isEqual(/a/gi, /a/gi)).toBe(true);
+    expect(isEqual(/a/g, /a/i)).toBe(false);
+
+    const mapA = new Map([["k", { v: 1 }]]);
+    const mapB = new Map([["k", { v: 1 }]]);
+    expect(isEqual(mapA, mapB)).toBe(true);
+    expect(isEqual(mapA, new Map([["k", { v: 2 }]]))).toBe(false);
+
+    const setA = new Set([1, { a: 1 }]);
+    const setB = new Set([{ a: 1 }, 1]);
+    expect(isEqual(setA, setB)).toBe(true);
+
+    const objA: any = { name: "s" };
+    objA.self = objA;
+    const objB: any = { name: "s" };
+    objB.self = objB;
+    expect(isEqual(objA, objB)).toBe(true);
+  });
+
   it("isMatch performs partial deep comparison", () => {
     const obj = { a: 1, b: { c: 2, d: 3 }, e: [1, 2, 3] };
     expect(isMatch(obj, { a: 1 })).toBe(true);
