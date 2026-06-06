@@ -97,10 +97,6 @@ To start development server:
 npm run dev
 ```
 
-## Documentation
-
-For detailed documentation and examples, please visit our [documentation](./docs).
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
