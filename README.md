@@ -59,6 +59,13 @@ console.log(isFunction(() => {})); // true
 - `unescape` - Unescapes HTML special characters
 - `escapeRegExp` - Escapes RegExp special characters
 
+### Clone Operations
+
+- `clone` - Creates a shallow clone of a value
+- `cloneDeep` - Creates a deep clone of a value
+- `cloneWith` - Creates a shallow clone with a customizer
+- `cloneDeepWith` - Creates a deep clone with a customizer
+
 ### Function Utilities
 
 - `debounce` - Creates a debounced function
