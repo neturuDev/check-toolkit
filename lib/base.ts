@@ -82,7 +82,7 @@ export const isNull = (value: unknown): value is null => {
  * @api public
  */
 export const isFunction = (value: any): value is Function => {
-  return Boolean(value) && value.constructor && value.call && value.apply;
+  return typeof value === "function";
 };
 
 /**
@@ -133,7 +133,7 @@ export const isUndefined = (value: unknown): value is undefined => {
  * @return {Boolean} true if 'value' is not undefined, false otherwise
  * @api public
  */
-export const isNotUndefined = (value: unknown): value is undefined => {
+export const isNotUndefined = <T>(value: T): value is Exclude<T, undefined> => {
   return !isUndefined(value);
 };
 
@@ -269,7 +269,7 @@ export const isEqual = (value: any, other: any) => {
  */
 export const isMatch = <T extends object, S extends Partial<T>>(
   object: T,
-  source: S
+  source: S,
 ): boolean => {
   return baseIsMatch(object, source, new WeakMap());
 };

@@ -19,13 +19,12 @@ describe("throttle", () => {
     expect(fn).toHaveBeenCalledWith("a");
   });
 
-  it("documents current behavior for leading=false and trailing=true", () => {
+  it("when leading=false and trailing=true, does not call immediately but calls once after wait with last args", () => {
     const fn = vi.fn();
     const t = throttle(fn, 50, { leading: false, trailing: true });
     t(1);
     t(2);
-    expect(fn).toHaveBeenCalledTimes(1);
-    expect(fn).toHaveBeenLastCalledWith(2);
+    expect(fn).toHaveBeenCalledTimes(0);
     // advance to trigger trailing call and assert last call used last args
     vi.advanceTimersByTime(50);
     expect(fn).toHaveBeenCalledTimes(1);

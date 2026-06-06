@@ -47,7 +47,7 @@ describe("debounce", () => {
     expect(fn).toHaveBeenLastCalledWith("again");
   });
 
-  it("documents current maxWait behavior with frequent calls", () => {
+  it("honors maxWait and invokes with the latest arguments", () => {
     const fn = vi.fn();
     const deb = debounce(fn, 100, { maxWait: 200 });
 
@@ -63,8 +63,7 @@ describe("debounce", () => {
     // at 200ms since first call, maxWait should force invoke
     vi.advanceTimersByTime(50); // now t=200
     expect(fn).toHaveBeenCalledTimes(1);
-    // the implementation will use the lastArgs available at invoke
-    expect(fn).toHaveBeenCalledWith("t50");
+    expect(fn).toHaveBeenCalledWith("t150");
   });
 
   it("cancel prevents a scheduled invocation", () => {
