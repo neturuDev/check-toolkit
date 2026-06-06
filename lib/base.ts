@@ -1,5 +1,5 @@
 import { OBJECT_TYPES } from "./constants";
-import { baseIsMatch } from "./common";
+import { baseIsEqual, baseIsMatch } from "./common";
 
 /**
  * isSymbol
@@ -213,53 +213,8 @@ export const isEmpty = (value: any): boolean => {
  * @param {*} other value to compare with
  * @return {Boolean} true if `value` is equal to `other`, false otherwise
  */
-export const isEqual = (value: any, other: any) => {
-  if (value === other) {
-    return true;
-  }
-
-  const type = Object.prototype.toString.call(value);
-
-  if (type !== Object.prototype.toString.call(other)) {
-    return false;
-  }
-
-  if (type === OBJECT_TYPES.function) {
-    return value.prototype === other.prototype;
-  }
-
-  if (type === OBJECT_TYPES.date) {
-    return value.getTime() === other.getTime();
-  }
-
-  if (type === OBJECT_TYPES.object) {
-    for (let key in value) {
-      if (!isEqual(value[key], other[key]) || !(key in other)) {
-        return false;
-      }
-    }
-    for (let key in other) {
-      if (!isEqual(value[key], other[key]) || !(key in value)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (type === OBJECT_TYPES.array) {
-    let key = value.length;
-    if (key !== other.length) {
-      return false;
-    }
-    while (key--) {
-      if (!isEqual(value[key], other[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  return false;
+export const isEqual = (value: any, other: any): boolean => {
+  return baseIsEqual(value, other, new WeakMap());
 };
 
 /**
@@ -276,6 +231,3 @@ export const isMatch = <T extends object, S extends Partial<T>>(
 ): boolean => {
   return baseIsMatch(object, source, new WeakMap());
 };
-
-// Add methods that return unwrapped values in chain sequences.
-// Add methods that return wrapped values in chain sequences.

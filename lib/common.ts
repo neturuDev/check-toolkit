@@ -93,3 +93,80 @@ export const baseIsMatch = (
       return true;
   }
 };
+
+export const baseIsEqual = (
+  a: any,
+  b: any,
+  seen: WeakMap<object, object>,
+): boolean => {
+  if (a === b || Object.is(a, b)) return true;
+
+  if (typeof a === "function" || typeof b === "function") {
+    return false;
+  }
+
+  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") {
+    return false;
+  }
+
+  const cached = seen.get(a);
+  if (cached === b) return true;
+  seen.set(a, b);
+
+  const tag = getTag(a);
+  if (tag !== getTag(b)) return false;
+
+  switch (tag) {
+    case OBJECT_TYPES.date:
+      return +a === +b;
+
+    case OBJECT_TYPES.regExp:
+      return a.source === b.source && a.flags === b.flags;
+
+    case OBJECT_TYPES.array:
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (!baseIsEqual(a[i], b[i], seen)) return false;
+      }
+      return true;
+
+    case OBJECT_TYPES.map:
+      if (!(a instanceof Map) || !(b instanceof Map)) return false;
+      if (a.size !== b.size) return false;
+      for (const [k, v] of a) {
+        if (!b.has(k)) return false;
+        if (!baseIsEqual(v, b.get(k), seen)) return false;
+      }
+      return true;
+
+    case OBJECT_TYPES.set:
+      if (!(a instanceof Set) || !(b instanceof Set)) return false;
+      if (a.size !== b.size) return false;
+      for (const v of a) {
+        if (isPrimitive(v)) {
+          if (!b.has(v)) return false;
+        } else {
+          let found = false;
+          for (const cand of b) {
+            if (baseIsEqual(v, cand, seen)) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) return false;
+        }
+      }
+      return true;
+
+    default: {
+      const aKeys = ownKeys(a);
+      const bKeys = ownKeys(b);
+      if (aKeys.length !== bKeys.length) return false;
+      for (const key of aKeys) {
+        if (!hasOwn(b, key)) return false;
+        if (!baseIsEqual(a[key], b[key], seen)) return false;
+      }
+      return true;
+    }
+  }
+};
