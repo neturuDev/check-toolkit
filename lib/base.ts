@@ -197,6 +197,9 @@ export const isEmpty = (value: any): boolean => {
         }
       }
       return true;
+    case OBJECT_TYPES.map:
+    case OBJECT_TYPES.set:
+      return value.size === 0;
   }
 
   return !value;

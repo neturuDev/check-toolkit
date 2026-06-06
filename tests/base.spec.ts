@@ -106,6 +106,11 @@ describe("base utilities", () => {
     expect(isEmpty(false)).toBe(true);
     expect(isEmpty(null)).toBe(true);
     expect(isEmpty(undefined)).toBe(true);
+
+    expect(isEmpty(new Map())).toBe(true);
+    expect(isEmpty(new Map([["a", 1]]))).toBe(false);
+    expect(isEmpty(new Set())).toBe(true);
+    expect(isEmpty(new Set([1]))).toBe(false);
   });
 
   it("isEqual supports primitives, dates, arrays, objects and functions (prototype check)", () => {
