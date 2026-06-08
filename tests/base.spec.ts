@@ -70,6 +70,11 @@ describe("base utilities", () => {
 
     expect(isNotNil(0)).toBe(true);
     expect(isNotNil(null)).toBe(false);
+
+    const maybeName: string | null | undefined = "alice";
+    if (isNotNil(maybeName)) {
+      expect(maybeName).toBe("alice");
+    }
   });
 
   it("isFunction detects functions", () => {
@@ -106,6 +111,11 @@ describe("base utilities", () => {
     expect(isEmpty(false)).toBe(true);
     expect(isEmpty(null)).toBe(true);
     expect(isEmpty(undefined)).toBe(true);
+
+    expect(isEmpty(new Map())).toBe(true);
+    expect(isEmpty(new Map([["a", 1]]))).toBe(false);
+    expect(isEmpty(new Set())).toBe(true);
+    expect(isEmpty(new Set([1]))).toBe(false);
   });
 
   it("isEqual supports primitives, dates, arrays, objects and functions (prototype check)", () => {
@@ -130,6 +140,27 @@ describe("base utilities", () => {
     expect(isEqual(A, A)).toBe(true);
     // different functions -> prototypes differ -> false
     expect(isEqual(A, B)).toBe(false);
+  });
+
+  it("isEqual supports NaN, RegExp, Map, Set and cyclical structures", () => {
+    expect(isEqual(NaN, NaN)).toBe(true);
+    expect(isEqual(/a/gi, /a/gi)).toBe(true);
+    expect(isEqual(/a/g, /a/i)).toBe(false);
+
+    const mapA = new Map([["k", { v: 1 }]]);
+    const mapB = new Map([["k", { v: 1 }]]);
+    expect(isEqual(mapA, mapB)).toBe(true);
+    expect(isEqual(mapA, new Map([["k", { v: 2 }]]))).toBe(false);
+
+    const setA = new Set([1, { a: 1 }]);
+    const setB = new Set([{ a: 1 }, 1]);
+    expect(isEqual(setA, setB)).toBe(true);
+
+    const objA: any = { name: "s" };
+    objA.self = objA;
+    const objB: any = { name: "s" };
+    objB.self = objB;
+    expect(isEqual(objA, objB)).toBe(true);
   });
 
   it("isMatch performs partial deep comparison", () => {

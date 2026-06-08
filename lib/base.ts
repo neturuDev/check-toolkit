@@ -1,5 +1,5 @@
 import { OBJECT_TYPES } from "./constants";
-import { baseIsMatch } from "./common";
+import { baseIsEqual, baseIsMatch } from "./common";
 
 /**
  * isSymbol
@@ -25,7 +25,7 @@ export const isArray = Array.isArray;
 
 /**
  * isArrayLike
- * Check if `value` is isArrayLike.
+ * Check if `value` is array-like.
  *
  * @param {*} value to check
  * @return {Boolean} true if `value` is array-like, else false.
@@ -75,13 +75,15 @@ export const isNull = (value: unknown): value is null => {
 
 /**
  * isFunction
- * Check if `value` is Null.
+ * Check if `value` is a function.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is function, false otherwise
  * @api public
  */
-export const isFunction = (value: any): value is Function => {
+export const isFunction = (
+  value: unknown,
+): value is (...args: any[]) => any => {
   return typeof value === "function";
 };
 
@@ -103,7 +105,7 @@ export const isNumber = (value: any): value is number => {
 
 /**
  * isString
- * Check if `value` is Null.
+ * Check if `value` is a string.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is string, false otherwise
@@ -127,7 +129,7 @@ export const isUndefined = (value: unknown): value is undefined => {
 
 /**
  * isNotUndefined
- * Check if `value` is undefined.
+ * Check if `value` is not undefined.
  *
  * @param {*} value value to check
  * @return {Boolean} true if 'value' is not undefined, false otherwise
@@ -157,7 +159,7 @@ export const isNil = (value: unknown): value is null | undefined => {
  * @return {Boolean} true if 'value' is not null or undefined, false otherwise
  * @api public
  */
-export const isNotNil = (value: unknown): boolean => {
+export const isNotNil = <T>(value: T): value is NonNullable<T> => {
   return !isNil(value);
 };
 
@@ -197,6 +199,9 @@ export const isEmpty = (value: any): boolean => {
         }
       }
       return true;
+    case OBJECT_TYPES.map:
+    case OBJECT_TYPES.set:
+      return value.size === 0;
   }
 
   return !value;
@@ -210,53 +215,8 @@ export const isEmpty = (value: any): boolean => {
  * @param {*} other value to compare with
  * @return {Boolean} true if `value` is equal to `other`, false otherwise
  */
-export const isEqual = (value: any, other: any) => {
-  if (value === other) {
-    return true;
-  }
-
-  const type = Object.prototype.toString.call(value);
-
-  if (type !== Object.prototype.toString.call(other)) {
-    return false;
-  }
-
-  if (type === OBJECT_TYPES.function) {
-    return value.prototype === other.prototype;
-  }
-
-  if (type === OBJECT_TYPES.date) {
-    return value.getTime() === other.getTime();
-  }
-
-  if (type === OBJECT_TYPES.object) {
-    for (let key in value) {
-      if (!isEqual(value[key], other[key]) || !(key in other)) {
-        return false;
-      }
-    }
-    for (let key in other) {
-      if (!isEqual(value[key], other[key]) || !(key in value)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (type === OBJECT_TYPES.array) {
-    let key = value.length;
-    if (key !== other.length) {
-      return false;
-    }
-    while (key--) {
-      if (!isEqual(value[key], other[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  return false;
+export const isEqual = (value: any, other: any): boolean => {
+  return baseIsEqual(value, other, new WeakMap());
 };
 
 /**
@@ -273,6 +233,3 @@ export const isMatch = <T extends object, S extends Partial<T>>(
 ): boolean => {
   return baseIsMatch(object, source, new WeakMap());
 };
-
-// Add methods that return unwrapped values in chain sequences.
-// Add methods that return wrapped values in chain sequences.
