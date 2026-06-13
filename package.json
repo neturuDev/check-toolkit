@@ -1,6 +1,6 @@
 {
   "name": "check-toolkit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "module": "./dist/check-toolkit.js",
   "author": "Volodymyr Cherevchuk",
@@ -30,9 +30,9 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.1.2",
+    "@types/node": "^25.9.3",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
   }
 }
