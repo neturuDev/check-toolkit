@@ -9,6 +9,8 @@ import {
   isFunction,
   isNumber,
   isString,
+  isBoolean,
+  isPlainObject,
   isUndefined,
   isNotUndefined,
   isNil,
@@ -94,6 +96,24 @@ describe("base utilities", () => {
     expect(isString("abc")).toBe(true);
     expect(isString(new String("abc"))).toBe(true);
     expect(isString(123)).toBe(false);
+  });
+
+  it("isBoolean detects boolean primitives", () => {
+    expect(isBoolean(true)).toBe(true);
+    expect(isBoolean(false)).toBe(true);
+    expect(isBoolean(new Boolean(true))).toBe(false);
+    expect(isBoolean(1)).toBe(false);
+  });
+
+  it("isPlainObject detects plain objects only", () => {
+    expect(isPlainObject({})).toBe(true);
+    expect(isPlainObject({ a: 1 })).toBe(true);
+    expect(isPlainObject(Object.create(null))).toBe(true);
+    expect(isPlainObject([])).toBe(false);
+    expect(isPlainObject(null)).toBe(false);
+    expect(isPlainObject(new Date())).toBe(false);
+    class Box {}
+    expect(isPlainObject(new Box())).toBe(false);
   });
 
   it("isEmpty behavior for arrays, strings, objects and primitives", () => {

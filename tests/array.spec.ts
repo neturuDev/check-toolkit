@@ -1,5 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { difference, differenceBy, differenceWith, keyBy } from "../lib/array";
+import {
+  compact,
+  countBy,
+  difference,
+  differenceBy,
+  differenceWith,
+  groupBy,
+  keyBy,
+  partition,
+  sortBy,
+  uniq,
+  uniqBy,
+} from "../lib/array";
 
 describe("array helpers", () => {
   describe("difference", () => {
@@ -85,6 +97,108 @@ describe("array helpers", () => {
 
     it("works with empty array", () => {
       expect(keyBy([], "id")).toEqual({});
+    });
+  });
+
+  describe("compact", () => {
+    it("removes falsy values", () => {
+      expect(compact([0, 1, false, 2, "", 3, null, undefined])).toEqual([
+        1, 2, 3,
+      ]);
+    });
+  });
+
+  describe("uniq", () => {
+    it("removes duplicate values", () => {
+      expect(uniq([1, 2, 1, 3, 2])).toEqual([1, 2, 3]);
+    });
+  });
+
+  describe("uniqBy", () => {
+    it("removes duplicates by iteratee", () => {
+      expect(uniqBy([2.1, 1.2, 2.3], Math.floor)).toEqual([2.1, 1.2]);
+    });
+  });
+
+  describe("groupBy", () => {
+    it("groups items by iteratee", () => {
+      const items = [
+        { type: "fruit", name: "apple" },
+        { type: "fruit", name: "banana" },
+        { type: "veg", name: "carrot" },
+      ];
+      expect(groupBy(items, "type")).toEqual({
+        fruit: [
+          { type: "fruit", name: "apple" },
+          { type: "fruit", name: "banana" },
+        ],
+        veg: [{ type: "veg", name: "carrot" }],
+      });
+    });
+  });
+
+  describe("countBy", () => {
+    it("counts items by property name", () => {
+      const users = [
+        { status: "active" },
+        { status: "active" },
+        { status: "pending" },
+      ];
+      expect(countBy(users, "status")).toEqual({ active: 2, pending: 1 });
+    });
+
+    it("counts items by iteratee function", () => {
+      expect(countBy([2.1, 1.2, 2.3, 1.8], Math.floor)).toEqual({
+        1: 2,
+        2: 2,
+      });
+    });
+
+    it("returns empty object for empty array", () => {
+      expect(countBy([], "id")).toEqual({});
+    });
+  });
+
+  describe("partition", () => {
+    it("splits array by predicate", () => {
+      expect(partition([1, 2, 3, 4], (n) => n % 2 === 0)).toEqual([
+        [2, 4],
+        [1, 3],
+      ]);
+    });
+  });
+
+  describe("sortBy", () => {
+    it("sorts by property name", () => {
+      const users = [
+        { name: "bob", age: 30 },
+        { name: "alice", age: 20 },
+      ];
+      expect(sortBy(users, "age")).toEqual([
+        { name: "alice", age: 20 },
+        { name: "bob", age: 30 },
+      ]);
+    });
+
+    it("compares numbers numerically", () => {
+      const items = [{ n: 10 }, { n: 2 }, { n: 30 }];
+      expect(sortBy(items, "n")).toEqual([{ n: 2 }, { n: 10 }, { n: 30 }]);
+    });
+
+    it("compares mixed string and number keys without JS coercion", () => {
+      const items = [{ k: 10 }, { k: "2" }, { k: 2 }];
+      expect(sortBy(items, (item) => item.k)).toEqual([
+        { k: "2" },
+        { k: 2 },
+        { k: 10 },
+      ]);
+    });
+
+    it("allows only sortable property keys", () => {
+      const users = [{ age: 30, meta: { active: true } }];
+      expect(sortBy(users, "age")).toEqual([{ age: 30, meta: { active: true } }]);
+      // @ts-expect-error meta values are not string | number
+      sortBy(users, "meta");
     });
   });
 });

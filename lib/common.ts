@@ -8,7 +8,7 @@ export const ownKeys = (o: object): (string | symbol)[] => {
   return [...Object.keys(o), ...Object.getOwnPropertySymbols(o)];
 };
 
-export const hasOwn = (o: object, k: string | symbol): boolean => {
+export const hasOwn = (o: object, k: PropertyKey): boolean => {
   return Object.prototype.hasOwnProperty.call(o, k);
 };
 

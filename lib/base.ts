@@ -116,6 +116,46 @@ export const isString = (value: unknown): value is string => {
 };
 
 /**
+ * isBoolean
+ * Check if `value` is a boolean.
+ *
+ * @param {*} value value to check
+ * @return {Boolean} true if 'value' is boolean, false otherwise
+ * @api public
+ */
+export const isBoolean = (value: unknown): value is boolean => {
+  return value === true || value === false;
+};
+
+/**
+ * isPlainObject
+ * Check if `value` is a plain object.
+ *
+ * @param {*} value value to check
+ * @return {Boolean} true if 'value' is a plain object, false otherwise
+ * @api public
+ */
+export const isPlainObject = (
+  value: unknown,
+): value is Record<string, unknown> => {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(value) as object | null;
+  const hasObjectPrototype =
+    proto === null ||
+    proto === Object.prototype ||
+    Object.getPrototypeOf(proto) === null;
+
+  if (!hasObjectPrototype) {
+    return false;
+  }
+
+  return Object.prototype.toString.call(value) === OBJECT_TYPES.object;
+};
+
+/**
  * isUndefined
  * Check if `value` is undefined.
  *
