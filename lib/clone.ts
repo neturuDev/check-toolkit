@@ -1,5 +1,10 @@
 /**
- * Shallow clone (like lodash.clone)
+ * Creates a shallow clone of `value`.
+ *
+ * @example
+ * const obj = { a: 1, b: { x: 2 } };
+ * const copy = clone(obj);
+ * copy.b === obj.b // => true
  */
 export const clone = <T>(value: T): T => {
   if (Array.isArray(value)) {
@@ -83,21 +88,34 @@ const baseClone = <T>(
 };
 
 /**
- * Deep clone (like lodash.cloneDeep)
+ * Creates a deep clone of `value`.
+ *
+ * @example
+ * const obj = { a: 1, b: { x: 2 } };
+ * const copy = cloneDeep(obj);
+ * copy.b === obj.b // => false
  */
 export const cloneDeep = <T>(value: T): T => {
   return baseClone(value, true);
 };
 
 /**
- * Shallow clone with customizer (like lodash.cloneWith)
+ * Creates a shallow clone of `value`, invoking `customizer` for each property.
+ *
+ * @example
+ * cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))
+ * // => { a: 2 }
  */
 export const cloneWith = <T>(value: T, customizer: (val: any) => any): T => {
   return baseClone(value, false, customizer);
 };
 
 /**
- * Deep clone with customizer (like lodash.cloneDeepWith)
+ * Creates a deep clone of `value`, invoking `customizer` for each property.
+ *
+ * @example
+ * cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : val))
+ * // => { a: { b: 2 } }
  */
 export const cloneDeepWith = <T>(
   value: T,

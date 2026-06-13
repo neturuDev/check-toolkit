@@ -8,6 +8,13 @@ export interface ThrottleOptions {
 export interface ThrottledFunction<T extends (...args: any[]) => any>
   extends DebouncedFunction<T> {}
 
+/**
+ * Creates a throttled function that invokes `func` at most once per `wait` milliseconds.
+ *
+ * @example
+ * const onScroll = throttle(() => updateLayout(), 100);
+ * window.addEventListener('scroll', onScroll);
+ */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   wait = 0,

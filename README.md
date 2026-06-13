@@ -1,6 +1,13 @@
 # check-toolkit
 
-A TypeScript utility library for type checking and validation.
+A lightweight TypeScript utility library focused on type guards and small, tree-shakeable helpers. Zero runtime dependencies — import only what you need.
+
+## Why check-toolkit?
+
+- **Lightweight** — small implementations without heavy lodash-style utilities
+- **Tree-shakeable** — each function is imported separately
+- **Zero runtime dependencies** — nothing extra in your bundle
+- **Typed** — type guards like `isNotNil` and `isPlainObject` narrow types in TypeScript
 
 ## Installation
 
@@ -11,17 +18,13 @@ npm install check-toolkit
 ## Usage
 
 ```typescript
-import { isString } from "check-toolkit";
-import { isNumber } from "check-toolkit";
-import { isArray } from "check-toolkit";
-// ... import other functions as needed
+import { isString, isPlainObject, pick } from "check-toolkit";
 
-// Type checking examples
 console.log(isString("test")); // true
-console.log(isNumber(42)); // true
-console.log(isArray([1, 2, 3])); // true
-console.log(isObject({})); // true
-console.log(isFunction(() => {})); // true
+console.log(isPlainObject({ a: 1 })); // true
+
+const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
+// { a: 1, c: 3 }
 ```
 
 ## Available Functions
@@ -37,6 +40,8 @@ console.log(isFunction(() => {})); // true
 - `isFunction` - Check if value is a function
 - `isNumber` - Check if value is a number
 - `isString` - Check if value is a string
+- `isBoolean` - Check if value is a boolean
+- `isPlainObject` - Check if value is a plain object
 - `isUndefined` - Check if value is undefined
 - `isNotUndefined` - Check if value is not undefined
 - `isNil` - Check if value is null or undefined
@@ -46,8 +51,22 @@ console.log(isFunction(() => {})); // true
 - `isEqual` - Check if two values are equal
 - `isMatch` - Check if object matches source
 
+### Object Operations
+
+- `pick` - Creates a new object with only the specified keys
+- `omit` - Creates a new object without the specified keys
+- `pickBy` - Creates a new object with entries that satisfy a predicate
+- `omitBy` - Creates a new object without entries that satisfy a predicate
+
 ### Array Operations
 
+- `compact` - Removes falsy values from an array
+- `countBy` - Counts elements grouped by iteratee result
+- `uniq` - Creates an array with unique values
+- `uniqBy` - Like uniq but accepts an iteratee
+- `groupBy` - Groups array elements by iteratee result
+- `partition` - Splits an array into two groups by predicate
+- `sortBy` - Creates a sorted copy by iteratee result
 - `difference` - Create an array of unique values not included in other arrays
 - `differenceBy` - Like difference but accepts iteratee
 - `differenceWith` - Like difference but accepts comparator
@@ -55,6 +74,11 @@ console.log(isFunction(() => {})); // true
 
 ### String Operations
 
+- `capitalize` - Uppercases the first character only (not title case; uses `toUpperCase`)
+- `camelCase` - Converts a string to camel case
+- `kebabCase` - Converts a string to kebab case
+- `snakeCase` - Converts a string to snake case
+- `startCase` - Converts each word to start case (title-style)
 - `escape` - Escapes HTML special characters
 - `unescape` - Unescapes HTML special characters
 - `escapeRegExp` - Escapes RegExp special characters
@@ -70,12 +94,17 @@ console.log(isFunction(() => {})); // true
 
 - `debounce` - Creates a debounced function
 - `throttle` - Creates a throttled function
+- `noop` - No-op default callback
+- `identity` - Returns the first argument unchanged
+- `once` - Invokes a function at most once
 
-## Module Organization
+### Math
 
-- Internally, utility functions are grouped by domain in `lib/array.ts` and `lib/string.ts`.
-- `lib/helpers.ts` is kept as a compatibility re-export layer for existing deep imports.
-- Prefer importing from the package root (`check-toolkit`) rather than deep-importing internal files.
+- `clamp` - Clamps a number between min and max
+
+### Promise
+
+- `delay` - Resolves after the specified milliseconds
 
 ## Testing
 

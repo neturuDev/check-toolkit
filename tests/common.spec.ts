@@ -44,6 +44,12 @@ describe("common utilities", () => {
       expect(hasOwn(o, "own")).toBe(true);
       expect(hasOwn(o, s)).toBe(true);
     });
+
+    it("works with numeric keys", () => {
+      const o: { 123: string } = { 123: "x" };
+      expect(hasOwn(o, 123)).toBe(true);
+      expect(hasOwn(o, "123")).toBe(true);
+    });
   });
 
   describe("isPrimitive", () => {

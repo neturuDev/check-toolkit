@@ -1,10 +1,11 @@
 {
   "name": "check-toolkit",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "type": "module",
   "module": "./dist/check-toolkit.js",
   "author": "Volodymyr Cherevchuk",
   "license": "MIT",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/neturuDev/check-toolkit.git"
@@ -19,8 +20,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/check-toolkit.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/check-toolkit.js"
     }
   },
   "scripts": {
