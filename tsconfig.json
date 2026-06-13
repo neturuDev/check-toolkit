@@ -17,6 +17,7 @@
     //Emit types
     "declaration": true,
     "emitDeclarationOnly": true,
+    "rootDir": "lib",
     "outDir": "dist",
 
     /* Linting */
