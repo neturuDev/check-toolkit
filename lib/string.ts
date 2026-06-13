@@ -79,6 +79,9 @@ export const startCase = (str: string): string => {
 
 /**
  * Converts the characters "&", "<", ">", '"', and "'" in `string` to their HTML entities.
+ *
+ * @example
+ * escape('<div>"a"</div>') // => '&lt;div&gt;&quot;a&quot;&lt;/div&gt;'
  */
 export const escape = (str: string): string => {
   const htmlEscapes: Record<string, string> = {
@@ -93,6 +96,9 @@ export const escape = (str: string): string => {
 
 /**
  * The inverse of `escape`; converts HTML entities back to characters.
+ *
+ * @example
+ * unescape('&lt;div&gt;') // => '<div>'
  */
 export const unescape = (str: string): string => {
   const htmlUnescapes: Record<string, string> = {
@@ -110,7 +116,9 @@ export const unescape = (str: string): string => {
 
 /**
  * Escapes RegExp special characters in `string`.
- * Useful for creating a RegExp from user input.
+ *
+ * @example
+ * escapeRegExp('[a-z]+') // => '\\[a-z\\]\\+'
  */
 export const escapeRegExp = (str: string): string => {
   return str.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");

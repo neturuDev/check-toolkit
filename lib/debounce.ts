@@ -10,6 +10,17 @@ export interface DebouncedFunction<T extends (...args: any[]) => any> {
   flush(): void;
 }
 
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last call.
+ *
+ * The debounced function exposes `cancel()` and `flush()` methods.
+ *
+ * @example
+ * const search = debounce((query) => fetch(`/api?q=${query}`), 300);
+ * search('a');
+ * search('ab'); // only this query is sent after 300ms
+ */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait = 0,

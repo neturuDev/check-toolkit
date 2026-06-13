@@ -193,6 +193,9 @@ export function sortBy<T>(array: readonly T[], iteratee: SortIteratee<T>): T[] {
 /**
  * Creates an array of unique values from `array` not included in the other given arrays.
  * Uses SameValueZero (like `===` but treats NaN as equal to NaN).
+ *
+ * @example
+ * difference([1, 2, 3], [2, 4], [3, 5]) // => [1]
  */
 export const difference = <T>(array: T[], ...values: T[][]): T[] => {
   if (!Array.isArray(array)) return [];
@@ -201,8 +204,10 @@ export const difference = <T>(array: T[], ...values: T[][]): T[] => {
 };
 
 /**
- * Like difference, but accepts an iteratee which is invoked for each element
- * to generate the criterion by which uniqueness is computed.
+ * Like `difference`, but compares elements by the result of `iteratee`.
+ *
+ * @example
+ * differenceBy([2.1, 1.2], [2.3, 3.4], Math.floor) // => [1.2]
  */
 export const differenceBy = <T>(
   array: T[],
@@ -216,7 +221,14 @@ export const differenceBy = <T>(
 };
 
 /**
- * Like difference, but accepts a comparator which is invoked to compare elements of arrays.
+ * Like `difference`, but uses `comparator` to compare elements.
+ *
+ * @example
+ * differenceWith(
+ *   [{ x: 1 }, { x: 2 }],
+ *   [{ x: 2 }],
+ *   (a, b) => a.x === b.x,
+ * ) // => [{ x: 1 }]
  */
 export const differenceWith = <T>(
   array: T[],
@@ -231,9 +243,12 @@ export const differenceWith = <T>(
 };
 
 /**
- * Creates an object composed of keys generated from the results of running
- * each element of `array` through `iteratee`.
- * The corresponding value of each key is the last element that generated it.
+ * Creates an object keyed by the result of `iteratee`.
+ * The value for each key is the last element that produced it.
+ *
+ * @example
+ * keyBy([{ id: 'a' }, { id: 'b' }, { id: 'a' }], 'id')
+ * // => { a: { id: 'a' }, b: { id: 'b' } }
  */
 export function keyBy<T, K extends PropertyKey>(
   array: readonly T[],

@@ -106,12 +106,6 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 - `delay` - Resolves after the specified milliseconds
 
-## Module Organization
-
-- Utility functions are grouped by domain in `lib/` (`array.ts`, `object.ts`, `string.ts`, and others).
-- `lib/helpers.ts` is kept as a compatibility re-export layer for existing deep imports.
-- Prefer importing from the package root (`check-toolkit`) rather than deep-importing internal files.
-
 ## Testing
 
 To run the test suite:
