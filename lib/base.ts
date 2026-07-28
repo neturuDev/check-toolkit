@@ -2,34 +2,41 @@ import { OBJECT_TYPES } from "./constants";
 import { baseIsEqual, baseIsMatch } from "./common";
 
 /**
- * isSymbol
- * Check if `value` is symbol.
+ * Checks if `value` is a symbol.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is symbol, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a symbol
+ *
+ * @example
+ * isSymbol(Symbol('x')) // true
+ * isSymbol('x') // false
  */
 export const isSymbol = (value: any): value is symbol => {
   return Boolean(value) && value.constructor === Symbol;
 };
 
 /**
- * isArray
- * Check if `value` is Array.
+ * Checks if `value` is an array (`Array.isArray`).
  *
- * @param {*} value to check
- * @return {Boolean} true if 'value' is array, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is an array
+ *
+ * @example
+ * isArray([1, 2]) // true
+ * isArray({ length: 2 }) // false
  */
 export const isArray = Array.isArray;
 
 /**
- * isArrayLike
- * Check if `value` is array-like.
+ * Checks if `value` is array-like (has a valid numeric `length`).
+ * Not a TypeScript type predicate.
  *
- * @param {*} value to check
- * @return {Boolean} true if `value` is array-like, else false.
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is array-like
+ *
+ * @example
+ * isArrayLike('abc') // true
+ * isArrayLike({ length: 2 }) // true
  */
 export const isArrayLike = (value: unknown): boolean =>
   value != null &&
@@ -40,46 +47,55 @@ export const isArrayLike = (value: unknown): boolean =>
   Math.floor((value as any).length) === (value as any).length;
 
 /**
- * isNan
- * Check if `value` is NaN.
+ * Checks if `value` is `NaN` (`Number.isNaN`).
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is NaN, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is `NaN`
+ *
+ * @example
+ * isNan(Number.NaN) // true
+ * isNan('foo') // false
  */
 export const isNan = Number.isNaN;
 
 /**
- * isObject
- * Check if `value` is Object.
+ * Checks if `value` has `constructor === Object`.
+ * Prefer {@link isPlainObject} for JSON-like payloads.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is Object, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is an Object-constructed value
+ *
+ * @example
+ * isObject({}) // true
+ * isObject([]) // false
  */
 export const isObject = (value: any): value is object => {
   return Boolean(value) && value.constructor === Object;
 };
 
 /**
- * isNull
- * Check if `value` is Null.
+ * Checks if `value` is `null`.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is Null, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is `null`
+ *
+ * @example
+ * isNull(null) // true
+ * isNull(undefined) // false
  */
 export const isNull = (value: unknown): value is null => {
   return value === null;
 };
 
 /**
- * isFunction
- * Check if `value` is a function.
+ * Checks if `value` is a function.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is function, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a function
+ *
+ * @example
+ * isFunction(() => {}) // true
+ * isFunction({}) // false
  */
 export const isFunction = (
   value: unknown,
@@ -88,12 +104,14 @@ export const isFunction = (
 };
 
 /**
- * isNumber
- * Check if `value` is Number.
+ * Checks if `value` is a number where `Number(value) === value`.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is number, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a number
+ *
+ * @example
+ * isNumber(1) // true
+ * isNumber(Number.NaN) // false
  */
 export const isNumber = (value: any): value is number => {
   try {
@@ -104,36 +122,44 @@ export const isNumber = (value: any): value is number => {
 };
 
 /**
- * isString
- * Check if `value` is a string.
+ * Checks if `value` is a string (primitive or `String` object).
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is string, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a string
+ *
+ * @example
+ * isString('hi') // true
+ * isString(1) // false
  */
 export const isString = (value: unknown): value is string => {
   return typeof value === "string" || value instanceof String;
 };
 
 /**
- * isBoolean
- * Check if `value` is a boolean.
+ * Checks if `value` is the boolean `true` or `false` (not truthiness).
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is boolean, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a boolean
+ *
+ * @example
+ * isBoolean(false) // true
+ * isBoolean(0) // false
  */
 export const isBoolean = (value: unknown): value is boolean => {
   return value === true || value === false;
 };
 
 /**
- * isPlainObject
- * Check if `value` is a plain object.
+ * Checks if `value` is a plain object (`Record`-like), not Array, Date, Map, class instances, etc.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is a plain object, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is a plain object
+ *
+ * @example
+ * if (isPlainObject(input)) {
+ *   // input is Record<string, unknown>
+ * }
+ * isPlainObject([]) // false
  */
 export const isPlainObject = (
   value: unknown,
@@ -156,74 +182,92 @@ export const isPlainObject = (
 };
 
 /**
- * isUndefined
- * Check if `value` is undefined.
+ * Checks if `value` is `undefined`.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is undefined, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is `undefined`
+ *
+ * @example
+ * isUndefined(undefined) // true
+ * isUndefined(null) // false
  */
 export const isUndefined = (value: unknown): value is undefined => {
   return value === undefined;
 };
 
 /**
- * isNotUndefined
- * Check if `value` is not undefined.
+ * Checks if `value` is not `undefined` (`null` still passes).
+ * Prefer {@link isNotNil} when both `null` and `undefined` should be excluded.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is not undefined, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is not `undefined`
+ *
+ * @example
+ * [1, undefined].filter(isNotUndefined) // [1]
  */
 export const isNotUndefined = <T>(value: T): value is Exclude<T, undefined> => {
   return !isUndefined(value);
 };
 
 /**
- * isNil
- * Check if `value` is null or undefined.
+ * Checks if `value` is `null` or `undefined`.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is null or undefined, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is `null` or `undefined`
+ *
+ * @example
+ * isNil(null) // true
+ * isNil(undefined) // true
+ * isNil(0) // false
  */
 export const isNil = (value: unknown): value is null | undefined => {
   return isNull(value) || isUndefined(value);
 };
 
 /**
- * isNotNil
- * Check if `value` is not null or undefined.
+ * Checks if `value` is neither `null` nor `undefined`.
+ * Prefer with `Array#filter` for TypeScript narrowing to `NonNullable<T>`.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is not null or undefined, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is not `null` or `undefined`
+ *
+ * @example
+ * const values: Array<string | null> = ['a', null];
+ * const cleaned: string[] = values.filter(isNotNil);
+ *
+ * if (isNotNil(value)) {
+ *   // value is NonNullable
+ * }
  */
 export const isNotNil = <T>(value: T): value is NonNullable<T> => {
   return !isNil(value);
 };
 
 /**
- * isNotNaN
- * Check if `value` is not NaN.
+ * Checks if `value` is not `NaN`. Not a TypeScript type predicate.
  *
- * @param {*} value value to check
- * @return {Boolean} true if 'value' is not NaN, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is not `NaN`
+ *
+ * @example
+ * isNotNaN(1) // true
+ * isNotNaN(Number.NaN) // false
  */
 export const isNotNaN = (value: unknown): boolean => {
   return !isNan(value);
 };
 
 /**
- * isEmpty
- * Check if `value` is empty.
+ * Checks if `value` is empty (empty string/array/object/map/set, or falsy for other types).
+ * Not a TypeScript type predicate.
  *
- * @param {*} value value to check
- * @return {Boolean} true if `value` is empty, false otherwise
- * @api public
+ * @param value - Value to check
+ * @returns `true` if `value` is empty
+ *
+ * @example
+ * isEmpty({}) // true
+ * isEmpty([1]) // false
  */
-
 export const isEmpty = (value: any): boolean => {
   const type = Object.prototype.toString.call(value);
 
@@ -248,24 +292,29 @@ export const isEmpty = (value: any): boolean => {
 };
 
 /**
- * isEqual
- * Check if `value` is equal to `other`.
+ * Performs a deep equality comparison of two values.
  *
- * @param {*} value value to check
- * @param {*} other value to compare with
- * @return {Boolean} true if `value` is equal to `other`, false otherwise
+ * @param value - Value to compare
+ * @param other - Other value to compare
+ * @returns `true` if the values are deeply equal
+ *
+ * @example
+ * isEqual({ a: 1 }, { a: 1 }) // true
+ * isEqual([1, 2], [1, 2]) // true
  */
 export const isEqual = (value: any, other: any): boolean => {
   return baseIsEqual(value, other, new WeakMap());
 };
 
 /**
- * isMatch
- * Check if `object` is equal to `source`.
+ * Checks if `object` partially deep-matches `source`.
  *
- * @param {*} object value to check
- * @param {*} source value to compare with
- * @return {Boolean} true if `object` matches `source` via partial deep comparison
+ * @param object - Object to inspect
+ * @param source - Partial source to match against
+ * @returns `true` if `object` matches `source`
+ *
+ * @example
+ * isMatch({ a: 1, b: 2 }, { a: 1 }) // true
  */
 export const isMatch = <T extends object, S extends Partial<T>>(
   object: T,

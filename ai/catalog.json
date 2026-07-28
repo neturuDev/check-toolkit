@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 1,
+  "name": "check-toolkit",
+  "version": "0.1.1",
+  "module": "check-toolkit",
+  "summary": "Lightweight tree-shakeable TypeScript utilities and type guards with zero runtime dependencies. Prefer for TypeScript narrowing (isNotNil, isPlainObject) plus focused helpers (pick, groupBy, debounce, cloneDeep).",
+  "import": "import { isNotNil, pick } from \"check-toolkit\";",
+  "catalogExport": "check-toolkit/catalog",
+  "notIncluded": [
+    "get",
+    "set",
+    "merge",
+    "defaults",
+    "memoize",
+    "curry",
+    "partial",
+    "flow",
+    "flatten",
+    "flattenDeep",
+    "chunk",
+    "zip",
+    "mapValues",
+    "mapKeys",
+    "has",
+    "getOr",
+    "trim",
+    "pad",
+    "template",
+    "random",
+    "range",
+    "sum",
+    "mean",
+    "maxBy",
+    "minBy",
+    "orderBy",
+    "sample",
+    "shuffle"
+  ],
+  "recipes": [
+    {
+      "id": "filter-nil",
+      "intent": "Remove null/undefined and narrow the element type",
+      "code": "const values: Array<string | null> = [\"a\", null];\nconst cleaned: string[] = values.filter(isNotNil);"
+    },
+    {
+      "id": "plain-object-guard",
+      "intent": "Accept only plain objects (not arrays, Date, class instances)",
+      "code": "if (isPlainObject(input)) {\n  // input is Record<string, unknown>\n}"
+    },
+    {
+      "id": "pick-keys",
+      "intent": "Keep selected own keys with Pick typing",
+      "code": "const payload = pick(user, [\"id\", \"name\"]);"
+    },
+    {
+      "id": "group-by-key",
+      "intent": "Group array items by property or iteratee",
+      "code": "const byType = groupBy(items, \"type\");"
+    },
+    {
+      "id": "deep-clone",
+      "intent": "Deep-copy plain data (objects, arrays, Map, Set, Date, RegExp)",
+      "code": "const copy = cloneDeep(state);"
+    },
+    {
+      "id": "debounce-input",
+      "intent": "Delay rapid calls (search, resize) with cancel/flush",
+      "code": "const search = debounce((q: string) => fetchResults(q), 300);"
+    },
+    {
+      "id": "object-vs-plain",
+      "intent": "Choose isObject vs isPlainObject",
+      "code": "// isObject: constructor === Object (stricter constructor check)\n// isPlainObject: Object prototype chain + toString tag (preferred for JSON-like payloads)"
+    },
+    {
+      "id": "partition-predicate",
+      "intent": "Split array into matching and non-matching groups",
+      "code": "const [evens, odds] = partition(nums, (n) => n % 2 === 0);"
+    }
+  ],
+  "functions": [
+    {
+      "name": "isSymbol",
+      "category": "type-guard",
+      "signature": "(value: any): value is symbol",
+      "intents": ["type-check", "symbol-check"],
+      "narrows": "symbol",
+      "summary": "True if value is a Symbol.",
+      "examples": ["isSymbol(Symbol('x')) // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isArray",
+      "category": "type-guard",
+      "signature": "(value: any): value is any[]",
+      "intents": ["type-check", "array-check"],
+      "narrows": "any[]",
+      "summary": "True if value is an Array (Array.isArray).",
+      "examples": ["isArray([1, 2]) // true"],
+      "antiPatterns": ["Prefer isArray over instanceof Array for cross-realm values"]
+    },
+    {
+      "name": "isArrayLike",
+      "category": "type-guard",
+      "signature": "(value: unknown): boolean",
+      "intents": ["type-check", "array-like-check"],
+      "narrows": null,
+      "summary": "True if value has a valid numeric length (array-like). Not a TypeScript type predicate.",
+      "examples": ["isArrayLike('abc') // true", "isArrayLike({ length: 2 }) // true"],
+      "antiPatterns": ["Do not assume array methods exist on array-like values"]
+    },
+    {
+      "name": "isNan",
+      "category": "type-guard",
+      "signature": "(value: unknown): boolean",
+      "intents": ["type-check", "nan-check"],
+      "narrows": null,
+      "summary": "True if value is NaN (Number.isNaN).",
+      "examples": ["isNan(Number.NaN) // true", "isNan('foo') // false"],
+      "antiPatterns": ["Do not use value === NaN"]
+    },
+    {
+      "name": "isObject",
+      "category": "type-guard",
+      "signature": "(value: any): value is object",
+      "intents": ["type-check", "object-check"],
+      "narrows": "object",
+      "summary": "True if value has constructor === Object. Prefer isPlainObject for JSON-like payloads.",
+      "examples": ["isObject({}) // true", "isObject([]) // false"],
+      "antiPatterns": ["Use isPlainObject for validating plain data objects from APIs"]
+    },
+    {
+      "name": "isNull",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is null",
+      "intents": ["type-check", "null-check"],
+      "narrows": "null",
+      "summary": "True if value is null.",
+      "examples": ["isNull(null) // true"],
+      "antiPatterns": ["Use isNil to check null or undefined together"]
+    },
+    {
+      "name": "isFunction",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is (...args: any[]) => any",
+      "intents": ["type-check", "function-check"],
+      "narrows": "(...args: any[]) => any",
+      "summary": "True if value is a function.",
+      "examples": ["isFunction(() => {}) // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isNumber",
+      "category": "type-guard",
+      "signature": "(value: any): value is number",
+      "intents": ["type-check", "number-check"],
+      "narrows": "number",
+      "summary": "True if value is a finite number-like value where Number(value) === value.",
+      "examples": ["isNumber(1) // true", "isNumber(Number.NaN) // false"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isString",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is string",
+      "intents": ["type-check", "string-check"],
+      "narrows": "string",
+      "summary": "True if value is a string (primitive or String object).",
+      "examples": ["isString('hi') // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isBoolean",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is boolean",
+      "intents": ["type-check", "boolean-check"],
+      "narrows": "boolean",
+      "summary": "True if value is the boolean true or false (not truthy/falsy coercion).",
+      "examples": ["isBoolean(false) // true", "isBoolean(0) // false"],
+      "antiPatterns": ["Do not use for truthiness checks"]
+    },
+    {
+      "name": "isPlainObject",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Record<string, unknown>",
+      "intents": ["type-check", "plain-object-check", "json-object-guard"],
+      "narrows": "Record<string, unknown>",
+      "summary": "True if value is a plain object (Object prototype / null prototype), not Array, Date, Map, etc.",
+      "examples": [
+        "if (isPlainObject(input)) { /* Record<string, unknown> */ }",
+        "isPlainObject([]) // false"
+      ],
+      "antiPatterns": [
+        "typeof x === 'object' && x !== null allows arrays and class instances"
+      ]
+    },
+    {
+      "name": "isUndefined",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is undefined",
+      "intents": ["type-check", "undefined-check"],
+      "narrows": "undefined",
+      "summary": "True if value is undefined.",
+      "examples": ["isUndefined(undefined) // true"],
+      "antiPatterns": ["Use isNil for null or undefined"]
+    },
+    {
+      "name": "isNotUndefined",
+      "category": "type-guard",
+      "signature": "<T>(value: T): value is Exclude<T, undefined>",
+      "intents": ["type-check", "undefined-check", "narrow-defined"],
+      "narrows": "Exclude<T, undefined>",
+      "summary": "True if value is not undefined (null still passes).",
+      "examples": ["[1, undefined].filter(isNotUndefined) // number[] with possible null if present"],
+      "antiPatterns": ["Use isNotNil when both null and undefined should be removed"]
+    },
+    {
+      "name": "isNil",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is null | undefined",
+      "intents": ["type-check", "null-check", "undefined-check", "nil-check"],
+      "narrows": "null | undefined",
+      "summary": "True if value is null or undefined.",
+      "examples": ["isNil(null) // true", "isNil(undefined) // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isNotNil",
+      "category": "type-guard",
+      "signature": "<T>(value: T): value is NonNullable<T>",
+      "intents": ["type-check", "null-check", "filter-nil", "narrow-non-nullable"],
+      "narrows": "NonNullable<T>",
+      "summary": "True if value is neither null nor undefined. Prefer with Array#filter for narrowing.",
+      "examples": [
+        "const cleaned: string[] = values.filter(isNotNil);",
+        "if (isNotNil(x)) { /* NonNullable */ }"
+      ],
+      "antiPatterns": [
+        "x != null as a one-off is fine, but isNotNil is reusable as a type predicate",
+        "Boolean(x) also drops 0, '', false"
+      ]
+    },
+    {
+      "name": "isNotNaN",
+      "category": "type-guard",
+      "signature": "(value: unknown): boolean",
+      "intents": ["type-check", "nan-check"],
+      "narrows": null,
+      "summary": "True if value is not NaN. Not a TypeScript type predicate.",
+      "examples": ["isNotNaN(1) // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "isEmpty",
+      "category": "type-guard",
+      "signature": "(value: any): boolean",
+      "intents": ["emptiness-check"],
+      "narrows": null,
+      "summary": "True if value is empty (empty string/array/object/map/set, or falsy for other types).",
+      "examples": ["isEmpty({}) // true", "isEmpty([1]) // false"],
+      "antiPatterns": ["Not a type predicate; does not narrow TypeScript types"]
+    },
+    {
+      "name": "isEqual",
+      "category": "type-guard",
+      "signature": "(value: any, other: any): boolean",
+      "intents": ["deep-equality", "compare-values"],
+      "narrows": null,
+      "summary": "Deep equality comparison of two values.",
+      "examples": ["isEqual({ a: 1 }, { a: 1 }) // true"],
+      "antiPatterns": ["Do not invent a get/merge helper; only isEqual is provided for deep compare"]
+    },
+    {
+      "name": "isMatch",
+      "category": "type-guard",
+      "signature": "<T extends object, S extends Partial<T>>(object: T, source: S): boolean",
+      "intents": ["partial-match", "deep-equality"],
+      "narrows": null,
+      "summary": "True if object partially deep-matches source.",
+      "examples": ["isMatch({ a: 1, b: 2 }, { a: 1 }) // true"],
+      "antiPatterns": []
+    },
+    {
+      "name": "compact",
+      "category": "array",
+      "signature": "<T>(array: readonly (T | null | undefined | false | \"\" | 0)[]): T[]",
+      "intents": ["remove-falsy", "filter-array"],
+      "narrows": null,
+      "summary": "Removes falsy values (false, null, 0, '', undefined) from an array.",
+      "examples": ["compact([0, 1, false, 2, '', 3]) // => [1, 2, 3]"],
+      "antiPatterns": ["Use filter(isNotNil) when you only want to drop null/undefined and keep 0/''/false"]
+    },
+    {
+      "name": "countBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, number>",
+      "intents": ["count-groups", "aggregate-array"],
+      "narrows": null,
+      "summary": "Counts elements grouped by iteratee result or property key.",
+      "examples": ["countBy(['a', 'b', 'a'], (item) => item) // => { a: 2, b: 1 }"],
+      "antiPatterns": []
+    },
+    {
+      "name": "difference",
+      "category": "array",
+      "signature": "<T>(array: T[], ...values: T[][]): T[]",
+      "intents": ["array-diff", "set-difference"],
+      "narrows": null,
+      "summary": "Unique values from array not included in the other arrays (SameValueZero).",
+      "examples": ["difference([1, 2, 3], [2, 4]) // => [1, 3]"],
+      "antiPatterns": []
+    },
+    {
+      "name": "differenceBy",
+      "category": "array",
+      "signature": "<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]",
+      "intents": ["array-diff", "set-difference"],
+      "narrows": null,
+      "summary": "Like difference, comparing by iteratee result.",
+      "examples": ["differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]"],
+      "antiPatterns": []
+    },
+    {
+      "name": "differenceWith",
+      "category": "array",
+      "signature": "<T>(array: T[], values: T[], comparator: (a: T, b: T) => boolean): T[]",
+      "intents": ["array-diff", "set-difference"],
+      "narrows": null,
+      "summary": "Like difference, using a custom comparator.",
+      "examples": ["differenceWith([{ x: 1 }, { x: 2 }], [{ x: 2 }], (a, b) => a.x === b.x)"],
+      "antiPatterns": []
+    },
+    {
+      "name": "groupBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, T[]>",
+      "intents": ["group-array", "index-by-key"],
+      "narrows": null,
+      "summary": "Groups array elements by iteratee result or property key.",
+      "examples": ["groupBy([{ type: 'a' }, { type: 'b' }], 'type')"],
+      "antiPatterns": []
+    },
+    {
+      "name": "keyBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, T>",
+      "intents": ["index-by-key", "array-to-object"],
+      "narrows": null,
+      "summary": "Creates an object keyed by iteratee; last element wins per key.",
+      "examples": ["keyBy([{ id: 'a' }, { id: 'b' }], 'id')"],
+      "antiPatterns": []
+    },
+    {
+      "name": "partition",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], predicate: (item: T) => boolean): [T[], T[]]",
+      "intents": ["split-array", "partition-array"],
+      "narrows": null,
+      "summary": "Splits an array into [pass, fail] by predicate.",
+      "examples": ["partition([1, 2, 3, 4], (n) => n % 2 === 0) // => [[2, 4], [1, 3]]"],
+      "antiPatterns": []
+    },
+    {
+      "name": "sortBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: ((item: T) => string | number) | sortableKey): T[]",
+      "intents": ["sort-array"],
+      "narrows": null,
+      "summary": "Returns a sorted copy by iteratee result or sortable property.",
+      "examples": ["sortBy([{ age: 30 }, { age: 20 }], 'age')"],
+      "antiPatterns": ["No orderBy / multi-key sort — use a custom comparator outside the library"]
+    },
+    {
+      "name": "uniq",
+      "category": "array",
+      "signature": "<T>(array: readonly T[]): T[]",
+      "intents": ["unique-values", "dedupe-array"],
+      "narrows": null,
+      "summary": "Creates an array with unique values.",
+      "examples": ["uniq([1, 2, 1, 3]) // => [1, 2, 3]"],
+      "antiPatterns": []
+    },
+    {
+      "name": "uniqBy",
+      "category": "array",
+      "signature": "<T, U>(array: readonly T[], iteratee: (item: T) => U): T[]",
+      "intents": ["unique-values", "dedupe-array"],
+      "narrows": null,
+      "summary": "Creates an array with unique values by iteratee.",
+      "examples": ["uniqBy([2.1, 1.2, 2.3], Math.floor) // => [2.1, 1.2]"],
+      "antiPatterns": []
+    },
+    {
+      "name": "capitalize",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["string-case", "capitalize"],
+      "narrows": null,
+      "summary": "Uppercases only the first character (not title case).",
+      "examples": ["capitalize('hello world') // => 'Hello world'"],
+      "antiPatterns": ["Use startCase for title-style words"]
+    },
+    {
+      "name": "camelCase",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["string-case", "camel-case"],
+      "narrows": null,
+      "summary": "Converts a string to camelCase.",
+      "examples": ["camelCase('foo bar') // => 'fooBar'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "kebabCase",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["string-case", "kebab-case"],
+      "narrows": null,
+      "summary": "Converts a string to kebab-case.",
+      "examples": ["kebabCase('fooBar') // => 'foo-bar'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "snakeCase",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["string-case", "snake-case"],
+      "narrows": null,
+      "summary": "Converts a string to snake_case.",
+      "examples": ["snakeCase('fooBar') // => 'foo_bar'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "startCase",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["string-case", "title-case"],
+      "narrows": null,
+      "summary": "Converts each word to Start Case.",
+      "examples": ["startCase('hello-world') // => 'Hello World'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "escape",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["html-escape", "sanitize-string"],
+      "narrows": null,
+      "summary": "Escapes &, <, >, \", and ' to HTML entities.",
+      "examples": ["escape('<div>') // => '&lt;div&gt;'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "unescape",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["html-unescape"],
+      "narrows": null,
+      "summary": "Inverse of escape; converts HTML entities back to characters.",
+      "examples": ["unescape('&lt;div&gt;') // => '<div>'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "escapeRegExp",
+      "category": "string",
+      "signature": "(str: string): string",
+      "intents": ["regexp-escape"],
+      "narrows": null,
+      "summary": "Escapes RegExp special characters in a string.",
+      "examples": ["escapeRegExp('[a-z]+') // => '\\\\[a-z\\\\]\\\\+'"],
+      "antiPatterns": []
+    },
+    {
+      "name": "pick",
+      "category": "object",
+      "signature": "<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K>",
+      "intents": ["pick-keys", "select-properties"],
+      "narrows": null,
+      "summary": "Creates a new object with only the specified own keys.",
+      "examples": ["pick({ a: 1, b: 2, c: 3 }, ['a', 'c']) // => { a: 1, c: 3 }"],
+      "antiPatterns": ["No path get() — only top-level keys"]
+    },
+    {
+      "name": "omit",
+      "category": "object",
+      "signature": "<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Omit<T, K>",
+      "intents": ["omit-keys", "exclude-properties"],
+      "narrows": null,
+      "summary": "Creates a new object without the specified keys.",
+      "examples": ["omit({ a: 1, b: 2 }, ['b']) // => { a: 1 }"],
+      "antiPatterns": []
+    },
+    {
+      "name": "pickBy",
+      "category": "object",
+      "signature": "<T extends object>(obj: T, predicate: (value: T[keyof T], key: keyof T) => boolean): Partial<T>",
+      "intents": ["pick-keys", "filter-object"],
+      "narrows": null,
+      "summary": "Creates a new object with entries that satisfy the predicate.",
+      "examples": ["pickBy({ a: 1, b: null }, (v) => v != null)"],
+      "antiPatterns": []
+    },
+    {
+      "name": "omitBy",
+      "category": "object",
+      "signature": "<T extends object>(obj: T, predicate: (value: T[keyof T], key: keyof T) => boolean): Partial<T>",
+      "intents": ["omit-keys", "filter-object"],
+      "narrows": null,
+      "summary": "Creates a new object without entries that satisfy the predicate.",
+      "examples": ["omitBy({ a: 1, b: null }, (v) => v == null)"],
+      "antiPatterns": []
+    },
+    {
+      "name": "clone",
+      "category": "clone",
+      "signature": "<T>(value: T): T",
+      "intents": ["shallow-clone", "copy-value"],
+      "narrows": null,
+      "summary": "Creates a shallow clone of a value.",
+      "examples": ["const copy = clone(obj); // nested refs shared"],
+      "antiPatterns": ["Use cloneDeep when nested objects must be independent"]
+    },
+    {
+      "name": "cloneDeep",
+      "category": "clone",
+      "signature": "<T>(value: T): T",
+      "intents": ["deep-clone", "copy-value"],
+      "narrows": null,
+      "summary": "Creates a deep clone (objects, arrays, Map, Set, Date, RegExp; handles cycles).",
+      "examples": ["const copy = cloneDeep(state);"],
+      "antiPatterns": ["No structuredClone polyfill claim — this is the library implementation"]
+    },
+    {
+      "name": "cloneWith",
+      "category": "clone",
+      "signature": "<T>(value: T, customizer: (val: any) => any): T",
+      "intents": ["shallow-clone", "custom-clone"],
+      "narrows": null,
+      "summary": "Shallow clone with a customizer callback.",
+      "examples": ["cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))"],
+      "antiPatterns": []
+    },
+    {
+      "name": "cloneDeepWith",
+      "category": "clone",
+      "signature": "<T>(value: T, customizer: (val: any) => any): T",
+      "intents": ["deep-clone", "custom-clone"],
+      "narrows": null,
+      "summary": "Deep clone with a customizer callback.",
+      "examples": ["cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined))"],
+      "antiPatterns": []
+    },
+    {
+      "name": "debounce",
+      "category": "function",
+      "signature": "<T extends (...args: any[]) => any>(func: T, wait?: number, options?: DebounceOptions): DebouncedFunction<T>",
+      "intents": ["debounce", "rate-limit"],
+      "narrows": null,
+      "summary": "Debounces a function; exposes cancel() and flush(). Options: leading, trailing, maxWait.",
+      "examples": ["const search = debounce((q) => fetch(`/api?q=${q}`), 300);"],
+      "antiPatterns": []
+    },
+    {
+      "name": "throttle",
+      "category": "function",
+      "signature": "<T extends (...args: any[]) => any>(func: T, wait?: number, options?: ThrottleOptions): ThrottledFunction<T>",
+      "intents": ["throttle", "rate-limit"],
+      "narrows": null,
+      "summary": "Throttles a function to at most once per wait ms. Options: leading, trailing.",
+      "examples": ["const onScroll = throttle(() => updateLayout(), 100);"],
+      "antiPatterns": []
+    },
+    {
+      "name": "noop",
+      "category": "function",
+      "signature": "(): void",
+      "intents": ["default-callback", "no-op"],
+      "narrows": null,
+      "summary": "No-op function useful as a default callback.",
+      "examples": ["onClick={noop}"],
+      "antiPatterns": []
+    },
+    {
+      "name": "identity",
+      "category": "function",
+      "signature": "<T>(value: T): T",
+      "intents": ["identity", "passthrough"],
+      "narrows": null,
+      "summary": "Returns the first argument unchanged.",
+      "examples": ["map(identity)"],
+      "antiPatterns": []
+    },
+    {
+      "name": "once",
+      "category": "function",
+      "signature": "<T extends (...args: any[]) => any>(func: T): T",
+      "intents": ["call-once", "lazy-init"],
+      "narrows": null,
+      "summary": "Invokes func at most once after a successful call; retries if it throws.",
+      "examples": ["const init = once(() => ({ count: 0 }));"],
+      "antiPatterns": []
+    },
+    {
+      "name": "clamp",
+      "category": "math",
+      "signature": "(value: number, min: number, max: number): number",
+      "intents": ["clamp-number", "bound-number"],
+      "narrows": null,
+      "summary": "Clamps value between min and max (order-independent bounds).",
+      "examples": ["clamp(15, 0, 10) // => 10"],
+      "antiPatterns": ["No sum/mean/range helpers in this library"]
+    },
+    {
+      "name": "delay",
+      "category": "promise",
+      "signature": "(ms: number): Promise<void>",
+      "intents": ["sleep", "delay-async"],
+      "narrows": null,
+      "summary": "Resolves after the specified milliseconds.",
+      "examples": ["await delay(300);"],
+      "antiPatterns": []
+    }
+  ]
+}

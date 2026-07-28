@@ -1,10 +1,16 @@
 /**
  * No-op function useful as a default callback.
+ *
+ * @example
+ * onClick={noop}
  */
 export const noop = (): void => {};
 
 /**
  * Returns the first argument unchanged.
+ *
+ * @example
+ * [1, 2, 3].map(identity) // => [1, 2, 3]
  */
 export const identity = <T>(value: T): T => value;
 
