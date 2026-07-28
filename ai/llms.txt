@@ -557,7 +557,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - summary: Debounces a function; exposes cancel() and flush(). Options: leading, trailing, maxWait.
 - intents: debounce, rate-limit
 - examples:
-  - `const search = debounce((q) => fetch(`/api?q=${q}`), 300);`
+  - ``const search = debounce((q) => fetch(`/api?q=${q}`), 300);``
 
 #### throttle
 

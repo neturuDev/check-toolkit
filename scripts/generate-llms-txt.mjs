@@ -69,6 +69,19 @@ const categoryOrder = [
   "promise",
 ];
 
+/** CommonMark inline code: fence longer than any backtick run inside the text. */
+const toInlineCode = (text) => {
+  const longestRun = Math.max(
+    0,
+    ...(text.match(/`+/g) ?? []).map((run) => run.length),
+  );
+  const fence = "`".repeat(longestRun + 1);
+  const needsPad =
+    text.startsWith("`") || text.endsWith("`") || /^\s|\s$/.test(text);
+  const content = needsPad ? ` ${text} ` : text;
+  return `${fence}${content}${fence}`;
+};
+
 const lines = [
   `# ${catalog.name}`,
   "",
@@ -113,10 +126,10 @@ for (const category of categoryOrder) {
   for (const fn of functions) {
     lines.push(`#### ${fn.name}`);
     lines.push("");
-    lines.push(`- signature: \`${fn.signature}\``);
+    lines.push(`- signature: ${toInlineCode(fn.signature)}`);
     lines.push(`- summary: ${fn.summary}`);
     if (fn.narrows) {
-      lines.push(`- narrows: \`${fn.narrows}\``);
+      lines.push(`- narrows: ${toInlineCode(fn.narrows)}`);
     }
     if (fn.intents?.length) {
       lines.push(`- intents: ${fn.intents.join(", ")}`);
@@ -124,7 +137,7 @@ for (const category of categoryOrder) {
     if (fn.examples?.length) {
       lines.push("- examples:");
       for (const example of fn.examples) {
-        lines.push(`  - \`${example}\``);
+        lines.push(`  - ${toInlineCode(example)}`);
       }
     }
     if (fn.antiPatterns?.length) {
