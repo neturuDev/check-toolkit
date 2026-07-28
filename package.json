@@ -1,6 +1,18 @@
 {
   "name": "check-toolkit",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Lightweight tree-shakeable TypeScript utilities and type guards with zero dependencies",
+  "keywords": [
+    "typescript",
+    "utility",
+    "type-guards",
+    "tree-shakeable",
+    "lodash",
+    "esm",
+    "debounce",
+    "cloneDeep",
+    "isNil"
+  ],
   "type": "module",
   "module": "./dist/check-toolkit.js",
   "author": "Volodymyr Cherevchuk",
