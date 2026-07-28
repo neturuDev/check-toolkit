@@ -1,6 +1,6 @@
 {
   "name": "check-toolkit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lightweight tree-shakeable TypeScript utilities and type guards with zero dependencies",
   "keywords": [
     "typescript",

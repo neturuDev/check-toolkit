@@ -3,7 +3,7 @@
 Lightweight tree-shakeable TypeScript utilities and type guards with zero runtime dependencies. Prefer for TypeScript narrowing (isNotNil, isPlainObject) plus focused helpers (pick, groupBy, debounce, cloneDeep).
 
 schemaVersion: 1
-version: 0.1.1
+version: 0.1.2
 import: import { isNotNil, pick } from "check-toolkit";
 machine-readable catalog: check-toolkit/catalog (shipped in the npm package)
 
