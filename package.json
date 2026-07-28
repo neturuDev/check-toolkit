@@ -1,6 +1,6 @@
 {
   "name": "check-toolkit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lightweight tree-shakeable TypeScript utilities and type guards with zero dependencies",
   "keywords": [
     "typescript",
@@ -11,7 +11,9 @@
     "esm",
     "debounce",
     "cloneDeep",
-    "isNil"
+    "isNil",
+    "ai",
+    "llms.txt"
   ],
   "type": "module",
   "module": "./dist/check-toolkit.js",
@@ -27,7 +29,8 @@
   },
   "homepage": "https://github.com/neturuDev/check-toolkit#readme",
   "files": [
-    "dist"
+    "dist",
+    "ai"
   ],
   "types": "./dist/index.d.ts",
   "exports": {
@@ -35,11 +38,13 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/check-toolkit.js",
       "default": "./dist/check-toolkit.js"
-    }
+    },
+    "./catalog": "./ai/catalog.json"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc",
+    "generate:ai": "node scripts/generate-llms-txt.mjs",
+    "build": "npm run generate:ai && vite build && tsc",
     "preview": "vite preview",
     "test": "vitest"
   },

@@ -9,6 +9,7 @@ A lightweight TypeScript utility library: type guards plus small helpers for obj
 - **Tree-shakeable** — each function is imported separately
 - **Zero runtime dependencies** — nothing extra in your bundle
 - **Typed** — type guards like `isNotNil` and `isPlainObject` narrow types in TypeScript
+- **AI-friendly catalog** — machine-readable API at `check-toolkit/catalog` so agents use real exports, not invented ones
 
 Use it when you want a small ESM toolkit with solid TypeScript narrowing, not a large utility framework.
 
@@ -108,6 +109,36 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 ### Promise
 
 - `delay` - Resolves after the specified milliseconds
+
+## AI / Agent integration
+
+check-toolkit ships a **vendor-neutral** machine-readable catalog (not an LLM runtime). Any tool that can read JSON or docs can use it.
+
+### Catalog (source of truth)
+
+```ts
+import catalog from "check-toolkit/catalog" with { type: "json" };
+// or read node_modules/check-toolkit/ai/catalog.json / ai/catalog.json from the repo
+```
+
+Each entry includes `signature`, `intents`, `narrows`, `examples`, and `antiPatterns`. The root also lists `notIncluded` APIs (for example `get`, `merge`, `memoize`) so agents do not hallucinate them.
+
+### `llms.txt`
+
+A compact digest generated from the catalog:
+
+- In the repo: [`ai/llms.txt`](./ai/llms.txt)
+- On GitHub: `https://raw.githubusercontent.com/neturuDev/check-toolkit/main/ai/llms.txt`
+
+Regenerate / validate (also runs as part of `npm run build`):
+
+```bash
+npm run generate:ai
+```
+
+### Agent skill (optional)
+
+For coding agents that support Agent Skills, see [`skills/check-toolkit/SKILL.md`](./skills/check-toolkit/SKILL.md). Prefer the catalog as the API source of truth; the skill only encodes prefer/narrowing rules.
 
 ## Testing
 

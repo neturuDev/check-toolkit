@@ -1,0 +1,614 @@
+# check-toolkit
+
+Lightweight tree-shakeable TypeScript utilities and type guards with zero runtime dependencies. Prefer for TypeScript narrowing (isNotNil, isPlainObject) plus focused helpers (pick, groupBy, debounce, cloneDeep).
+
+schemaVersion: 1
+version: 0.1.2
+import: import { isNotNil, pick } from "check-toolkit";
+machine-readable catalog: check-toolkit/catalog (shipped in the npm package)
+
+## Not included
+
+Do not invent these APIs; they are not part of check-toolkit:
+
+- get
+- set
+- merge
+- defaults
+- memoize
+- curry
+- partial
+- flow
+- flatten
+- flattenDeep
+- chunk
+- zip
+- mapValues
+- mapKeys
+- has
+- getOr
+- trim
+- pad
+- template
+- random
+- range
+- sum
+- mean
+- maxBy
+- minBy
+- orderBy
+- sample
+- shuffle
+
+## TypeScript narrowing recipes
+
+### filter-nil
+
+Remove null/undefined and narrow the element type
+
+```ts
+const values: Array<string | null> = ["a", null];
+const cleaned: string[] = values.filter(isNotNil);
+```
+
+### plain-object-guard
+
+Accept only plain objects (not arrays, Date, class instances)
+
+```ts
+if (isPlainObject(input)) {
+  // input is Record<string, unknown>
+}
+```
+
+### pick-keys
+
+Keep selected own keys with Pick typing
+
+```ts
+const payload = pick(user, ["id", "name"]);
+```
+
+### group-by-key
+
+Group array items by property or iteratee
+
+```ts
+const byType = groupBy(items, "type");
+```
+
+### deep-clone
+
+Deep-copy plain data (objects, arrays, Map, Set, Date, RegExp)
+
+```ts
+const copy = cloneDeep(state);
+```
+
+### debounce-input
+
+Delay rapid calls (search, resize) with cancel/flush
+
+```ts
+const search = debounce((q: string) => fetchResults(q), 300);
+```
+
+### object-vs-plain
+
+Choose isObject vs isPlainObject
+
+```ts
+// isObject: constructor === Object (stricter constructor check)
+// isPlainObject: Object prototype chain + toString tag (preferred for JSON-like payloads)
+```
+
+### partition-predicate
+
+Split array into matching and non-matching groups
+
+```ts
+const [evens, odds] = partition(nums, (n) => n % 2 === 0);
+```
+
+## Functions
+
+### type-guard
+
+#### isSymbol
+
+- signature: `(value: any): value is symbol`
+- summary: True if value is a Symbol.
+- narrows: `symbol`
+- intents: type-check, symbol-check
+- examples:
+  - `isSymbol(Symbol('x')) // true`
+
+#### isArray
+
+- signature: `(value: any): value is any[]`
+- summary: True if value is an Array (Array.isArray).
+- narrows: `any[]`
+- intents: type-check, array-check
+- examples:
+  - `isArray([1, 2]) // true`
+- anti-patterns:
+  - Prefer isArray over instanceof Array for cross-realm values
+
+#### isArrayLike
+
+- signature: `(value: unknown): boolean`
+- summary: True if value has a valid numeric length (array-like). Not a TypeScript type predicate.
+- intents: type-check, array-like-check
+- examples:
+  - `isArrayLike('abc') // true`
+  - `isArrayLike({ length: 2 }) // true`
+- anti-patterns:
+  - Do not assume array methods exist on array-like values
+
+#### isNan
+
+- signature: `(value: unknown): boolean`
+- summary: True if value is NaN (Number.isNaN).
+- intents: type-check, nan-check
+- examples:
+  - `isNan(Number.NaN) // true`
+  - `isNan('foo') // false`
+- anti-patterns:
+  - Do not use value === NaN
+
+#### isObject
+
+- signature: `(value: any): value is object`
+- summary: True if value has constructor === Object. Prefer isPlainObject for JSON-like payloads.
+- narrows: `object`
+- intents: type-check, object-check
+- examples:
+  - `isObject({}) // true`
+  - `isObject([]) // false`
+- anti-patterns:
+  - Use isPlainObject for validating plain data objects from APIs
+
+#### isNull
+
+- signature: `(value: unknown): value is null`
+- summary: True if value is null.
+- narrows: `null`
+- intents: type-check, null-check
+- examples:
+  - `isNull(null) // true`
+- anti-patterns:
+  - Use isNil to check null or undefined together
+
+#### isFunction
+
+- signature: `(value: unknown): value is (...args: any[]) => any`
+- summary: True if value is a function.
+- narrows: `(...args: any[]) => any`
+- intents: type-check, function-check
+- examples:
+  - `isFunction(() => {}) // true`
+
+#### isNumber
+
+- signature: `(value: any): value is number`
+- summary: True if value is a finite number-like value where Number(value) === value.
+- narrows: `number`
+- intents: type-check, number-check
+- examples:
+  - `isNumber(1) // true`
+  - `isNumber(Number.NaN) // false`
+
+#### isString
+
+- signature: `(value: unknown): value is string`
+- summary: True if value is a string (primitive or String object).
+- narrows: `string`
+- intents: type-check, string-check
+- examples:
+  - `isString('hi') // true`
+
+#### isBoolean
+
+- signature: `(value: unknown): value is boolean`
+- summary: True if value is the boolean true or false (not truthy/falsy coercion).
+- narrows: `boolean`
+- intents: type-check, boolean-check
+- examples:
+  - `isBoolean(false) // true`
+  - `isBoolean(0) // false`
+- anti-patterns:
+  - Do not use for truthiness checks
+
+#### isPlainObject
+
+- signature: `(value: unknown): value is Record<string, unknown>`
+- summary: True if value is a plain object (Object prototype / null prototype), not Array, Date, Map, etc.
+- narrows: `Record<string, unknown>`
+- intents: type-check, plain-object-check, json-object-guard
+- examples:
+  - `if (isPlainObject(input)) { /* Record<string, unknown> */ }`
+  - `isPlainObject([]) // false`
+- anti-patterns:
+  - typeof x === 'object' && x !== null allows arrays and class instances
+
+#### isUndefined
+
+- signature: `(value: unknown): value is undefined`
+- summary: True if value is undefined.
+- narrows: `undefined`
+- intents: type-check, undefined-check
+- examples:
+  - `isUndefined(undefined) // true`
+- anti-patterns:
+  - Use isNil for null or undefined
+
+#### isNotUndefined
+
+- signature: `<T>(value: T): value is Exclude<T, undefined>`
+- summary: True if value is not undefined (null still passes).
+- narrows: `Exclude<T, undefined>`
+- intents: type-check, undefined-check, narrow-defined
+- examples:
+  - `[1, undefined].filter(isNotUndefined) // number[] with possible null if present`
+- anti-patterns:
+  - Use isNotNil when both null and undefined should be removed
+
+#### isNil
+
+- signature: `(value: unknown): value is null | undefined`
+- summary: True if value is null or undefined.
+- narrows: `null | undefined`
+- intents: type-check, null-check, undefined-check, nil-check
+- examples:
+  - `isNil(null) // true`
+  - `isNil(undefined) // true`
+
+#### isNotNil
+
+- signature: `<T>(value: T): value is NonNullable<T>`
+- summary: True if value is neither null nor undefined. Prefer with Array#filter for narrowing.
+- narrows: `NonNullable<T>`
+- intents: type-check, null-check, filter-nil, narrow-non-nullable
+- examples:
+  - `const cleaned: string[] = values.filter(isNotNil);`
+  - `if (isNotNil(x)) { /* NonNullable */ }`
+- anti-patterns:
+  - x != null as a one-off is fine, but isNotNil is reusable as a type predicate
+  - Boolean(x) also drops 0, '', false
+
+#### isNotNaN
+
+- signature: `(value: unknown): boolean`
+- summary: True if value is not NaN. Not a TypeScript type predicate.
+- intents: type-check, nan-check
+- examples:
+  - `isNotNaN(1) // true`
+
+#### isEmpty
+
+- signature: `(value: any): boolean`
+- summary: True if value is empty (empty string/array/object/map/set, or falsy for other types).
+- intents: emptiness-check
+- examples:
+  - `isEmpty({}) // true`
+  - `isEmpty([1]) // false`
+- anti-patterns:
+  - Not a type predicate; does not narrow TypeScript types
+
+#### isEqual
+
+- signature: `(value: any, other: any): boolean`
+- summary: Deep equality comparison of two values.
+- intents: deep-equality, compare-values
+- examples:
+  - `isEqual({ a: 1 }, { a: 1 }) // true`
+- anti-patterns:
+  - Do not invent a get/merge helper; only isEqual is provided for deep compare
+
+#### isMatch
+
+- signature: `<T extends object, S extends Partial<T>>(object: T, source: S): boolean`
+- summary: True if object partially deep-matches source.
+- intents: partial-match, deep-equality
+- examples:
+  - `isMatch({ a: 1, b: 2 }, { a: 1 }) // true`
+
+### object
+
+#### pick
+
+- signature: `<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K>`
+- summary: Creates a new object with only the specified own keys.
+- intents: pick-keys, select-properties
+- examples:
+  - `pick({ a: 1, b: 2, c: 3 }, ['a', 'c']) // => { a: 1, c: 3 }`
+- anti-patterns:
+  - No path get() — only top-level keys
+
+#### omit
+
+- signature: `<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Omit<T, K>`
+- summary: Creates a new object without the specified keys.
+- intents: omit-keys, exclude-properties
+- examples:
+  - `omit({ a: 1, b: 2 }, ['b']) // => { a: 1 }`
+
+#### pickBy
+
+- signature: `<T extends object>(obj: T, predicate: (value: T[keyof T], key: keyof T) => boolean): Partial<T>`
+- summary: Creates a new object with entries that satisfy the predicate.
+- intents: pick-keys, filter-object
+- examples:
+  - `pickBy({ a: 1, b: null }, (v) => v != null)`
+
+#### omitBy
+
+- signature: `<T extends object>(obj: T, predicate: (value: T[keyof T], key: keyof T) => boolean): Partial<T>`
+- summary: Creates a new object without entries that satisfy the predicate.
+- intents: omit-keys, filter-object
+- examples:
+  - `omitBy({ a: 1, b: null }, (v) => v == null)`
+
+### array
+
+#### compact
+
+- signature: `<T>(array: readonly (T | null | undefined | false | "" | 0)[]): T[]`
+- summary: Removes falsy values (false, null, 0, '', undefined) from an array.
+- intents: remove-falsy, filter-array
+- examples:
+  - `compact([0, 1, false, 2, '', 3]) // => [1, 2, 3]`
+- anti-patterns:
+  - Use filter(isNotNil) when you only want to drop null/undefined and keep 0/''/false
+
+#### countBy
+
+- signature: `<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, number>`
+- summary: Counts elements grouped by iteratee result or property key.
+- intents: count-groups, aggregate-array
+- examples:
+  - `countBy(['a', 'b', 'a'], (item) => item) // => { a: 2, b: 1 }`
+
+#### difference
+
+- signature: `<T>(array: T[], ...values: T[][]): T[]`
+- summary: Unique values from array not included in the other arrays (SameValueZero).
+- intents: array-diff, set-difference
+- examples:
+  - `difference([1, 2, 3], [2, 4]) // => [1, 3]`
+
+#### differenceBy
+
+- signature: `<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]`
+- summary: Like difference, comparing by iteratee result.
+- intents: array-diff, set-difference
+- examples:
+  - `differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]`
+
+#### differenceWith
+
+- signature: `<T>(array: T[], values: T[], comparator: (a: T, b: T) => boolean): T[]`
+- summary: Like difference, using a custom comparator.
+- intents: array-diff, set-difference
+- examples:
+  - `differenceWith([{ x: 1 }, { x: 2 }], [{ x: 2 }], (a, b) => a.x === b.x)`
+
+#### groupBy
+
+- signature: `<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, T[]>`
+- summary: Groups array elements by iteratee result or property key.
+- intents: group-array, index-by-key
+- examples:
+  - `groupBy([{ type: 'a' }, { type: 'b' }], 'type')`
+
+#### keyBy
+
+- signature: `<T>(array: readonly T[], iteratee: ((item: T) => PropertyKey) | keyof T): Record<PropertyKey, T>`
+- summary: Creates an object keyed by iteratee; last element wins per key.
+- intents: index-by-key, array-to-object
+- examples:
+  - `keyBy([{ id: 'a' }, { id: 'b' }], 'id')`
+
+#### partition
+
+- signature: `<T>(array: readonly T[], predicate: (item: T) => boolean): [T[], T[]]`
+- summary: Splits an array into [pass, fail] by predicate.
+- intents: split-array, partition-array
+- examples:
+  - `partition([1, 2, 3, 4], (n) => n % 2 === 0) // => [[2, 4], [1, 3]]`
+
+#### sortBy
+
+- signature: `<T>(array: readonly T[], iteratee: ((item: T) => string | number) | sortableKey): T[]`
+- summary: Returns a sorted copy by iteratee result or sortable property.
+- intents: sort-array
+- examples:
+  - `sortBy([{ age: 30 }, { age: 20 }], 'age')`
+- anti-patterns:
+  - No orderBy / multi-key sort — use a custom comparator outside the library
+
+#### uniq
+
+- signature: `<T>(array: readonly T[]): T[]`
+- summary: Creates an array with unique values.
+- intents: unique-values, dedupe-array
+- examples:
+  - `uniq([1, 2, 1, 3]) // => [1, 2, 3]`
+
+#### uniqBy
+
+- signature: `<T, U>(array: readonly T[], iteratee: (item: T) => U): T[]`
+- summary: Creates an array with unique values by iteratee.
+- intents: unique-values, dedupe-array
+- examples:
+  - `uniqBy([2.1, 1.2, 2.3], Math.floor) // => [2.1, 1.2]`
+
+### string
+
+#### capitalize
+
+- signature: `(str: string): string`
+- summary: Uppercases only the first character (not title case).
+- intents: string-case, capitalize
+- examples:
+  - `capitalize('hello world') // => 'Hello world'`
+- anti-patterns:
+  - Use startCase for title-style words
+
+#### camelCase
+
+- signature: `(str: string): string`
+- summary: Converts a string to camelCase.
+- intents: string-case, camel-case
+- examples:
+  - `camelCase('foo bar') // => 'fooBar'`
+
+#### kebabCase
+
+- signature: `(str: string): string`
+- summary: Converts a string to kebab-case.
+- intents: string-case, kebab-case
+- examples:
+  - `kebabCase('fooBar') // => 'foo-bar'`
+
+#### snakeCase
+
+- signature: `(str: string): string`
+- summary: Converts a string to snake_case.
+- intents: string-case, snake-case
+- examples:
+  - `snakeCase('fooBar') // => 'foo_bar'`
+
+#### startCase
+
+- signature: `(str: string): string`
+- summary: Converts each word to Start Case.
+- intents: string-case, title-case
+- examples:
+  - `startCase('hello-world') // => 'Hello World'`
+
+#### escape
+
+- signature: `(str: string): string`
+- summary: Escapes &, <, >, ", and ' to HTML entities.
+- intents: html-escape, sanitize-string
+- examples:
+  - `escape('<div>') // => '&lt;div&gt;'`
+
+#### unescape
+
+- signature: `(str: string): string`
+- summary: Inverse of escape; converts HTML entities back to characters.
+- intents: html-unescape
+- examples:
+  - `unescape('&lt;div&gt;') // => '<div>'`
+
+#### escapeRegExp
+
+- signature: `(str: string): string`
+- summary: Escapes RegExp special characters in a string.
+- intents: regexp-escape
+- examples:
+  - `escapeRegExp('[a-z]+') // => '\\[a-z\\]\\+'`
+
+### clone
+
+#### clone
+
+- signature: `<T>(value: T): T`
+- summary: Creates a shallow clone of a value.
+- intents: shallow-clone, copy-value
+- examples:
+  - `const copy = clone(obj); // nested refs shared`
+- anti-patterns:
+  - Use cloneDeep when nested objects must be independent
+
+#### cloneDeep
+
+- signature: `<T>(value: T): T`
+- summary: Creates a deep clone (objects, arrays, Map, Set, Date, RegExp; handles cycles).
+- intents: deep-clone, copy-value
+- examples:
+  - `const copy = cloneDeep(state);`
+- anti-patterns:
+  - No structuredClone polyfill claim — this is the library implementation
+
+#### cloneWith
+
+- signature: `<T>(value: T, customizer: (val: any) => any): T`
+- summary: Shallow clone with a customizer callback.
+- intents: shallow-clone, custom-clone
+- examples:
+  - `cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))`
+
+#### cloneDeepWith
+
+- signature: `<T>(value: T, customizer: (val: any) => any): T`
+- summary: Deep clone with a customizer callback.
+- intents: deep-clone, custom-clone
+- examples:
+  - `cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined))`
+
+### function
+
+#### debounce
+
+- signature: `<T extends (...args: any[]) => any>(func: T, wait?: number, options?: DebounceOptions): DebouncedFunction<T>`
+- summary: Debounces a function; exposes cancel() and flush(). Options: leading, trailing, maxWait.
+- intents: debounce, rate-limit
+- examples:
+  - ``const search = debounce((q) => fetch(`/api?q=${q}`), 300);``
+
+#### throttle
+
+- signature: `<T extends (...args: any[]) => any>(func: T, wait?: number, options?: ThrottleOptions): ThrottledFunction<T>`
+- summary: Throttles a function to at most once per wait ms. Options: leading, trailing.
+- intents: throttle, rate-limit
+- examples:
+  - `const onScroll = throttle(() => updateLayout(), 100);`
+
+#### noop
+
+- signature: `(): void`
+- summary: No-op function useful as a default callback.
+- intents: default-callback, no-op
+- examples:
+  - `onClick={noop}`
+
+#### identity
+
+- signature: `<T>(value: T): T`
+- summary: Returns the first argument unchanged.
+- intents: identity, passthrough
+- examples:
+  - `map(identity)`
+
+#### once
+
+- signature: `<T extends (...args: any[]) => any>(func: T): T`
+- summary: Invokes func at most once after a successful call; retries if it throws.
+- intents: call-once, lazy-init
+- examples:
+  - `const init = once(() => ({ count: 0 }));`
+
+### math
+
+#### clamp
+
+- signature: `(value: number, min: number, max: number): number`
+- summary: Clamps value between min and max (order-independent bounds).
+- intents: clamp-number, bound-number
+- examples:
+  - `clamp(15, 0, 10) // => 10`
+- anti-patterns:
+  - No sum/mean/range helpers in this library
+
+### promise
+
+#### delay
+
+- signature: `(ms: number): Promise<void>`
+- summary: Resolves after the specified milliseconds.
+- intents: sleep, delay-async
+- examples:
+  - `await delay(300);`
