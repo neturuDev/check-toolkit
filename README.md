@@ -1,13 +1,16 @@
 # check-toolkit
 
-A lightweight TypeScript utility library focused on type guards and small, tree-shakeable helpers. Zero runtime dependencies — import only what you need.
+A lightweight TypeScript utility library: type guards plus small helpers for objects, arrays, strings, cloning, and functions. Zero runtime dependencies — import only what you need.
 
 ## Why check-toolkit?
 
-- **Lightweight** — small implementations without heavy lodash-style utilities
+- **Utilities + type guards** — `pick` / `groupBy` / `debounce` alongside `isNotNil` and friends
+- **Lightweight** — focused helpers without a full lodash-sized surface
 - **Tree-shakeable** — each function is imported separately
 - **Zero runtime dependencies** — nothing extra in your bundle
 - **Typed** — type guards like `isNotNil` and `isPlainObject` narrow types in TypeScript
+
+Use it when you want a small ESM toolkit with solid TypeScript narrowing, not a large utility framework.
 
 ## Installation
 
