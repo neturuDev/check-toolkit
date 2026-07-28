@@ -117,8 +117,8 @@ check-toolkit ships a **vendor-neutral** machine-readable catalog (not an LLM ru
 ### Catalog (source of truth)
 
 ```ts
-import catalog from "check-toolkit/catalog";
-// or: node_modules/check-toolkit/ai/catalog.json
+import catalog from "check-toolkit/catalog" with { type: "json" };
+// or read node_modules/check-toolkit/ai/catalog.json / ai/catalog.json from the repo
 ```
 
 Each entry includes `signature`, `intents`, `narrows`, `examples`, and `antiPatterns`. The root also lists `notIncluded` APIs (for example `get`, `merge`, `memoize`) so agents do not hallucinate them.
