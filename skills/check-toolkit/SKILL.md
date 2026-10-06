@@ -16,7 +16,7 @@ Lightweight ESM TypeScript utilities: **type guards + small helpers**. Zero runt
 1. Import only from `check-toolkit` (tree-shakeable named imports).
 2. Before suggesting a function, confirm it exists in `ai/catalog.json` or `lib/index.ts`.
 3. Prefer type guards that narrow (`isNotNil`, `isPlainObject`, `isString`, …) over ad-hoc checks when reuse or `filter` narrowing matters.
-4. Never invent APIs listed under `notIncluded` in the catalog (`get`, `set`, `merge`, `memoize`, `flatten`, …).
+4. Never invent APIs listed under `notIncluded` in the catalog (`get`, `set`, `merge`, `memoize`, `flattenDeep`, …).
 5. Machine-readable API: package export `check-toolkit/catalog` (same content as `ai/catalog.json`).
 6. Human/LLM digest: `ai/llms.txt` (generated from the catalog — do not treat it as a second source of truth).
 
@@ -48,4 +48,4 @@ const search = debounce((q: string) => fetchResults(q), 300);
 
 ## When not to use check-toolkit
 
-If the task needs a large lodash/es-toolkit surface (deep path ops, memoize, flatten, multi-key `orderBy`, etc.), say so and use another library — do not pretend check-toolkit has those APIs.
+If the task needs a large lodash/es-toolkit surface (deep path ops, memoize, `flattenDeep`, multi-key `orderBy`, etc.), say so and use another library — do not pretend check-toolkit has those APIs.

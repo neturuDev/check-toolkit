@@ -15,9 +15,7 @@
     "curry",
     "partial",
     "flow",
-    "flatten",
     "flattenDeep",
-    "chunk",
     "zip",
     "mapValues",
     "mapKeys",
@@ -28,10 +26,7 @@
     "template",
     "random",
     "range",
-    "sum",
     "mean",
-    "maxBy",
-    "minBy",
     "orderBy",
     "sample",
     "shuffle"
@@ -66,6 +61,11 @@
       "id": "debounce-input",
       "intent": "Delay rapid calls (search, resize) with cancel/flush",
       "code": "const search = debounce((q: string) => fetchResults(q), 300);"
+    },
+    {
+      "id": "sum-by",
+      "intent": "Sum a numeric field, skipping null and undefined",
+      "code": "const total = sumBy(items, \"price\");"
     },
     {
       "id": "object-vs-plain",
@@ -461,6 +461,86 @@
       "antiPatterns": []
     },
     {
+      "name": "intersection",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], ...others: readonly (readonly T[])[]): T[]",
+      "intents": ["array-intersection", "set-intersection"],
+      "narrows": null,
+      "summary": "Unique values from array that are included in every other array (SameValueZero). Order follows the first array. With no other arrays, returns unique values of array.",
+      "examples": ["intersection([2, 1, 2], [1, 2], [2, 3]) // => [2]"],
+      "antiPatterns": ["Objects are compared by reference. Use intersectionBy for a property."]
+    },
+    {
+      "name": "intersectionBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], values: readonly T[], iteratee: ((value: T) => unknown) | keyof T): T[]",
+      "intents": ["array-intersection", "set-intersection"],
+      "narrows": null,
+      "summary": "Unique values from array that also appear in one values array, compared by iteratee or property key. Unlike intersection, this does not take a rest list of arrays. Keeps the first match from array.",
+      "examples": ["intersectionBy([{ id: 1 }, { id: 2 }], [{ id: 2 }], 'id')"],
+      "antiPatterns": []
+    },
+    {
+      "name": "chunk",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], size: number): T[][]",
+      "intents": ["chunk-array", "batch-array"],
+      "narrows": null,
+      "summary": "Splits array into chunks of size. Size is truncated toward zero. Non-finite size, or truncated size below 1, returns []. Does not mutate the input.",
+      "examples": ["chunk([1, 2, 3, 4, 5], 2) // => [[1, 2], [3, 4], [5]]"],
+      "antiPatterns": ["Chunks are shallow copies"]
+    },
+    {
+      "name": "flatten",
+      "category": "array",
+      "signature": "<T>(array: readonly T[]): Array<T extends readonly (infer U)[] ? U : T>",
+      "intents": ["flatten-array"],
+      "narrows": null,
+      "summary": "Flattens one level. Nested arrays stay nested. Strings and array-like objects are not flattened.",
+      "examples": ["flatten([1, [2, [3]], 4]) // => [1, 2, [3], 4]"],
+      "antiPatterns": ["flattenDeep is not included"]
+    },
+    {
+      "name": "sum",
+      "category": "array",
+      "signature": "(array: readonly number[]): number",
+      "intents": ["sum-array"],
+      "narrows": null,
+      "summary": "Sums numbers. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN. An empty array is 0.",
+      "examples": ["sum([1, 2, 3]) // => 6"],
+      "antiPatterns": ["No mean helper. Use sumBy for object fields."]
+    },
+    {
+      "name": "sumBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => number | null | undefined): number; property overload accepts only keys whose NonNullable value extends number",
+      "intents": ["sum-array", "aggregate-array"],
+      "narrows": null,
+      "summary": "Sums numbers produced by iteratee or a numeric property. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN.",
+      "examples": ["sumBy([{ price: 1 }, { price: null }, { price: 2 }], 'price') // => 3"],
+      "antiPatterns": ["Property keys must be numeric (or nullish). A string field is a type error."]
+    },
+    {
+      "name": "minBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number",
+      "intents": ["min-by", "extremum"],
+      "narrows": null,
+      "summary": "First element with the smallest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.",
+      "examples": ["minBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 20 }"],
+      "antiPatterns": ["Returns the element, not the extreme value"]
+    },
+    {
+      "name": "maxBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number",
+      "intents": ["max-by", "extremum"],
+      "narrows": null,
+      "summary": "First element with the largest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.",
+      "examples": ["maxBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 30 }"],
+      "antiPatterns": ["Returns the element, not the extreme value. No multi-key orderBy."]
+    },
+    {
       "name": "capitalize",
       "category": "string",
       "signature": "(str: string): string",
@@ -678,7 +758,7 @@
       "narrows": null,
       "summary": "Clamps value between min and max (order-independent bounds).",
       "examples": ["clamp(15, 0, 10) // => 10"],
-      "antiPatterns": ["No sum/mean/range helpers in this library"]
+      "antiPatterns": ["No mean/range helpers. Use sum or sumBy for totals."]
     },
     {
       "name": "delay",

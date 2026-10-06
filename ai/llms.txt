@@ -19,9 +19,7 @@ Do not invent these APIs; they are not part of check-toolkit:
 - curry
 - partial
 - flow
-- flatten
 - flattenDeep
-- chunk
 - zip
 - mapValues
 - mapKeys
@@ -32,10 +30,7 @@ Do not invent these APIs; they are not part of check-toolkit:
 - template
 - random
 - range
-- sum
 - mean
-- maxBy
-- minBy
 - orderBy
 - sample
 - shuffle
@@ -91,6 +86,14 @@ Delay rapid calls (search, resize) with cancel/flush
 
 ```ts
 const search = debounce((q: string) => fetchResults(q), 300);
+```
+
+### sum-by
+
+Sum a numeric field, skipping null and undefined
+
+```ts
+const total = sumBy(items, "price");
 ```
 
 ### object-vs-plain
@@ -528,6 +531,84 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - examples:
   - `uniqBy([2.1, 1.2, 2.3], Math.floor) // => [2.1, 1.2]`
 
+#### intersection
+
+- signature: `<T>(array: readonly T[], ...others: readonly (readonly T[])[]): T[]`
+- summary: Unique values from array that are included in every other array (SameValueZero). Order follows the first array. With no other arrays, returns unique values of array.
+- intents: array-intersection, set-intersection
+- examples:
+  - `intersection([2, 1, 2], [1, 2], [2, 3]) // => [2]`
+- anti-patterns:
+  - Objects are compared by reference. Use intersectionBy for a property.
+
+#### intersectionBy
+
+- signature: `<T>(array: readonly T[], values: readonly T[], iteratee: ((value: T) => unknown) | keyof T): T[]`
+- summary: Unique values from array that also appear in one values array, compared by iteratee or property key. Unlike intersection, this does not take a rest list of arrays. Keeps the first match from array.
+- intents: array-intersection, set-intersection
+- examples:
+  - `intersectionBy([{ id: 1 }, { id: 2 }], [{ id: 2 }], 'id')`
+
+#### chunk
+
+- signature: `<T>(array: readonly T[], size: number): T[][]`
+- summary: Splits array into chunks of size. Size is truncated toward zero. Non-finite size, or truncated size below 1, returns []. Does not mutate the input.
+- intents: chunk-array, batch-array
+- examples:
+  - `chunk([1, 2, 3, 4, 5], 2) // => [[1, 2], [3, 4], [5]]`
+- anti-patterns:
+  - Chunks are shallow copies
+
+#### flatten
+
+- signature: `<T>(array: readonly T[]): Array<T extends readonly (infer U)[] ? U : T>`
+- summary: Flattens one level. Nested arrays stay nested. Strings and array-like objects are not flattened.
+- intents: flatten-array
+- examples:
+  - `flatten([1, [2, [3]], 4]) // => [1, 2, [3], 4]`
+- anti-patterns:
+  - flattenDeep is not included
+
+#### sum
+
+- signature: `(array: readonly number[]): number`
+- summary: Sums numbers. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN. An empty array is 0.
+- intents: sum-array
+- examples:
+  - `sum([1, 2, 3]) // => 6`
+- anti-patterns:
+  - No mean helper. Use sumBy for object fields.
+
+#### sumBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => number | null | undefined): number; property overload accepts only keys whose NonNullable value extends number`
+- summary: Sums numbers produced by iteratee or a numeric property. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN.
+- intents: sum-array, aggregate-array
+- examples:
+  - `sumBy([{ price: 1 }, { price: null }, { price: 2 }], 'price') // => 3`
+- anti-patterns:
+  - Property keys must be numeric (or nullish). A string field is a type error.
+
+#### minBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number`
+- summary: First element with the smallest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.
+- intents: min-by, extremum
+- examples:
+  - `minBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 20 }`
+- anti-patterns:
+  - Returns the element, not the extreme value
+
+#### maxBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number`
+- summary: First element with the largest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.
+- intents: max-by, extremum
+- examples:
+  - `maxBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 30 }`
+- anti-patterns:
+  - Returns the element, not the extreme value. No multi-key orderBy.
+
 ### string
 
 #### capitalize
@@ -686,7 +767,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - examples:
   - `clamp(15, 0, 10) // => 10`
 - anti-patterns:
-  - No sum/mean/range helpers in this library
+  - No mean/range helpers. Use sum or sumBy for totals.
 
 ### promise
 

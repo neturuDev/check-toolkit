@@ -28,15 +28,23 @@ export {
 } from "./base";
 
 export {
+  chunk,
   compact,
   countBy,
   difference,
   differenceBy,
   differenceWith,
+  flatten,
   groupBy,
+  intersection,
+  intersectionBy,
   keyBy,
+  maxBy,
+  minBy,
   partition,
   sortBy,
+  sum,
+  sumBy,
   uniq,
   uniqBy,
 } from "./array";

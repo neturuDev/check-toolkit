@@ -71,6 +71,7 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Array Operations
 
+- `chunk` - Splits an array into chunks of a given size
 - `compact` - Removes falsy values from an array
 - `countBy` - Counts elements grouped by iteratee result
 - `uniq` - Creates an array with unique values
@@ -78,9 +79,16 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `groupBy` - Groups array elements by iteratee result
 - `partition` - Splits an array into two groups by predicate
 - `sortBy` - Creates a sorted copy by iteratee result
+- `minBy` - First element with the smallest comparable value
+- `maxBy` - First element with the largest comparable value
+- `sum` - Sums numbers (`NaN` if a present value is not a number)
+- `sumBy` - Sums a numeric iteratee or property, skipping null and undefined
 - `difference` - Create an array of unique values not included in other arrays
 - `differenceBy` - Like difference but accepts iteratee
 - `differenceWith` - Like difference but accepts comparator
+- `intersection` - Unique values included in every given array
+- `intersectionBy` - Like intersection but accepts an iteratee or property
+- `flatten` - Flattens an array one level
 - `keyBy` - Creates an object composed of keys generated from array
 
 ### String Operations
