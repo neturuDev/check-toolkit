@@ -43,9 +43,16 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `isNull` - Check if value is null
 - `isFunction` - Check if value is a function
 - `isNumber` - Check if value is a number
+- `isInteger` - Check if value is an integer (`Number.isInteger`)
 - `isString` - Check if value is a string
 - `isBoolean` - Check if value is a boolean
 - `isPlainObject` - Check if value is a plain object
+- `isDate` - Check if value is a Date, including Invalid Date and cross-realm dates
+- `isRegExp` - Check if value is a RegExp
+- `isMap` - Check if value is a Map (`WeakMap` is false)
+- `isSet` - Check if value is a Set (`WeakSet` is false)
+- `isError` - Check if value is an Error, subclass, or DOMException
+- `isPromise` - Check if value is a native Promise (plain thenables are false)
 - `isUndefined` - Check if value is undefined
 - `isNotUndefined` - Check if value is not undefined
 - `isNil` - Check if value is null or undefined

@@ -8,4 +8,8 @@ export const OBJECT_TYPES = {
   regExp: "[object RegExp]",
   map: "[object Map]",
   set: "[object Set]",
+  error: "[object Error]",
+  aggregateError: "[object AggregateError]",
+  domException: "[object DOMException]",
+  promise: "[object Promise]",
 };

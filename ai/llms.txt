@@ -198,6 +198,19 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isNumber(1) // true`
   - `isNumber(Number.NaN) // false`
 
+#### isInteger
+
+- signature: `(value: unknown): value is number`
+- summary: True if value is an integer (Number.isInteger). Numeric strings, NaN, infinities, and bigints are false. Values outside MAX_SAFE_INTEGER can still be true.
+- narrows: `number`
+- intents: type-check, integer-check
+- examples:
+  - `isInteger(1) // true`
+  - `isInteger(1.5) // false`
+  - `isInteger('1') // false`
+- anti-patterns:
+  - Do not use isInteger to mean isSafeInteger
+
 #### isString
 
 - signature: `(value: unknown): value is string`
@@ -230,6 +243,78 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isPlainObject([]) // false`
 - anti-patterns:
   - typeof x === 'object' && x !== null allows arrays and class instances
+
+#### isDate
+
+- signature: `(value: unknown): value is Date`
+- summary: True for Date, including Invalid Date, a subclass, and a Date from another realm. Same-realm uses instanceof. Cross-realm matches the Date tag, getTime, and a prototype constructor named Date. That name match is sufficient, so another class named Date is accepted.
+- narrows: `Date`
+- intents: type-check, date-check
+- examples:
+  - `isDate(new Date()) // true`
+  - `isDate(new Date(NaN)) // true`
+  - `isDate('2020-01-01') // false`
+- anti-patterns:
+  - Invalid Date still returns true. Check Number.isNaN(date.getTime()) for a real timestamp.
+  - A class with the Date tag and getTime is rejected only when its constructor name is not Date.
+
+#### isRegExp
+
+- signature: `(value: unknown): value is RegExp`
+- summary: True for RegExp, including one from another realm.
+- narrows: `RegExp`
+- intents: type-check, regexp-check
+- examples:
+  - `isRegExp(/a/i) // true`
+  - `isRegExp('a') // false`
+
+#### isMap
+
+- signature: `(value: unknown): value is Map<unknown, unknown>`
+- summary: True for Map, including subclasses and a Map from another realm. WeakMap is false.
+- narrows: `Map<unknown, unknown>`
+- intents: type-check, map-check
+- examples:
+  - `isMap(new Map()) // true`
+  - `isMap(new WeakMap()) // false`
+- anti-patterns:
+  - Does not preserve Map key and value type parameters
+
+#### isSet
+
+- signature: `(value: unknown): value is Set<unknown>`
+- summary: True for Set, including subclasses and a Set from another realm. WeakSet is false.
+- narrows: `Set<unknown>`
+- intents: type-check, set-check
+- examples:
+  - `isSet(new Set()) // true`
+  - `isSet(new WeakSet()) // false`
+- anti-patterns:
+  - Does not preserve the Set element type parameter
+
+#### isError
+
+- signature: `(value: unknown): value is Error`
+- summary: True for Error, subclasses, and DOMException. Same-realm uses instanceof. Cross-realm also needs an error tag, string name and message, and a prototype constructor named Error. A class named Error that meets those checks is accepted. A plain { name, message } object is false.
+- narrows: `Error`
+- intents: type-check, error-check
+- examples:
+  - `isError(new TypeError('x')) // true`
+  - `isError({ message: 'x', name: 'Error' }) // false`
+- anti-patterns:
+  - Do not duck-type errors from name and message alone
+
+#### isPromise
+
+- signature: `(value: unknown): value is Promise<unknown>`
+- summary: True for a native Promise, including one from another realm. Plain thenables are false.
+- narrows: `Promise<unknown>`
+- intents: type-check, promise-check
+- examples:
+  - `isPromise(Promise.resolve(1)) // true`
+  - `isPromise({ then() {} }) // false`
+- anti-patterns:
+  - Thenables are not promises. timeout still accepts PromiseLike.
 
 #### isUndefined
 

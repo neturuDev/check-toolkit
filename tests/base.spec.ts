@@ -1,24 +1,32 @@
-import { describe, it, expect } from "vitest";
+import { runInNewContext } from "node:vm";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
-  isSymbol,
   isArray,
   isArrayLike,
-  isNan,
-  isObject,
-  isNull,
-  isFunction,
-  isNumber,
-  isString,
   isBoolean,
-  isPlainObject,
-  isUndefined,
-  isNotUndefined,
-  isNil,
-  isNotNil,
-  isNotNaN,
+  isDate,
   isEmpty,
   isEqual,
+  isError,
+  isFunction,
+  isInteger,
+  isMap,
   isMatch,
+  isNan,
+  isNil,
+  isNotNaN,
+  isNotNil,
+  isNotUndefined,
+  isNull,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isPromise,
+  isRegExp,
+  isSet,
+  isString,
+  isSymbol,
+  isUndefined,
 } from "../lib/base";
 
 describe("base utilities", () => {
@@ -190,5 +198,158 @@ describe("base utilities", () => {
     expect(isMatch(obj, { e: [1, 2, 3] })).toBe(true);
     expect(isMatch(obj, { e: [1, 2] })).toBe(false);
     expect(isMatch(obj, { f: 1 } as any)).toBe(false);
+  });
+
+  it("isInteger matches Number.isInteger", () => {
+    expect(isInteger(0)).toBe(true);
+    expect(isInteger(-3)).toBe(true);
+    expect(isInteger(1.0)).toBe(true);
+    expect(isInteger(Number.MAX_SAFE_INTEGER + 2)).toBe(true);
+
+    expect(isInteger(1.5)).toBe(false);
+    expect(isInteger(Number.NaN)).toBe(false);
+    expect(isInteger(Number.POSITIVE_INFINITY)).toBe(false);
+    expect(isInteger("1")).toBe(false);
+    expect(isInteger(true)).toBe(false);
+    expect(isInteger(new Number(1))).toBe(false);
+    expect(isInteger(1n)).toBe(false);
+
+    const value: unknown = 2;
+    if (isInteger(value)) {
+      expectTypeOf(value).toEqualTypeOf<number>();
+    }
+  });
+
+  it("isDate, isRegExp, isMap, and isSet narrow built-ins and reject lookalikes", () => {
+    expect(isDate(new Date(0))).toBe(true);
+    expect(isDate(new Date(Number.NaN))).toBe(true);
+    expect(isDate("2020-01-01")).toBe(false);
+    class FakeDate {
+      get [Symbol.toStringTag]() {
+        return "Date";
+      }
+      getTime() {
+        return 0;
+      }
+    }
+    class SubDate extends Date {}
+    expect(isDate(new FakeDate())).toBe(false);
+    const Clock = class Date {
+      get [Symbol.toStringTag]() {
+        return "Date";
+      }
+      getTime() {
+        return 0;
+      }
+    };
+    expect(new Clock() instanceof globalThis.Date).toBe(false);
+    expect(isDate(new Clock())).toBe(true);
+    expect(isDate(new SubDate(0))).toBe(true);
+    expect(isDate(new SubDate(Number.NaN))).toBe(true);
+
+    expect(isRegExp(/a/i)).toBe(true);
+    expect(isRegExp(new RegExp("a"))).toBe(true);
+    expect(isRegExp("a")).toBe(false);
+    expect(isRegExp({ [Symbol.toStringTag]: "RegExp" })).toBe(false);
+
+    class MyMap extends Map {}
+    class MySet extends Set {}
+    expect(isMap(new Map())).toBe(true);
+    expect(isMap(new MyMap())).toBe(true);
+    expect(isMap(new WeakMap())).toBe(false);
+    expect(isMap(new Set())).toBe(false);
+    expect(isMap({ [Symbol.toStringTag]: "Map" })).toBe(false);
+
+    expect(isSet(new Set())).toBe(true);
+    expect(isSet(new MySet())).toBe(true);
+    expect(isSet(new WeakSet())).toBe(false);
+    expect(isSet({ [Symbol.toStringTag]: "Set" })).toBe(false);
+
+    const value: unknown = new Date(0);
+    if (isDate(value)) {
+      expectTypeOf(value).toEqualTypeOf<Date>();
+      expect(value.getTime()).toBe(0);
+    }
+    const map: unknown = new Map<string, number>();
+    if (isMap(map)) {
+      expectTypeOf(map).toEqualTypeOf<Map<unknown, unknown>>();
+    }
+  });
+
+  it("isError accepts error subclasses and rejects plain objects", () => {
+    class AppError extends Error {}
+
+    expect(isError(new Error("x"))).toBe(true);
+    expect(isError(new TypeError("x"))).toBe(true);
+    expect(isError(new AggregateError([], "x"))).toBe(true);
+    expect(isError(new DOMException("x"))).toBe(true);
+    expect(isError(new AppError("x"))).toBe(true);
+    expect(isError({ message: "x", name: "Error" })).toBe(false);
+    class FakeError {
+      name = "Error";
+      message = "x";
+      get [Symbol.toStringTag]() {
+        return "Error";
+      }
+    }
+    expect(isError(new FakeError())).toBe(false);
+    expect(isError({ message: "x", name: "Error", [Symbol.toStringTag]: "Error" })).toBe(
+      false,
+    );
+    expect(isError("Error")).toBe(false);
+    expect(isError(null)).toBe(false);
+
+    const value: unknown = new TypeError("x");
+    if (isError(value)) {
+      expectTypeOf(value).toEqualTypeOf<Error>();
+    }
+  });
+
+  it("isPromise accepts native promises and rejects thenables", () => {
+    expect(isPromise(Promise.resolve(1))).toBe(true);
+    expect(isPromise(Promise.reject(new Error("x")).catch(() => undefined))).toBe(true);
+
+    async function load() {
+      return 1;
+    }
+    expect(isPromise(load())).toBe(true);
+
+    class MyPromise<T> extends Promise<T> {}
+    expect(isPromise(new MyPromise((resolve) => resolve(1)))).toBe(true);
+    class FakePromise {
+      get [Symbol.toStringTag]() {
+        return "Promise";
+      }
+      then() {}
+    }
+    expect(isPromise({ then() {} })).toBe(false);
+    expect(isPromise(new FakePromise())).toBe(false);
+    expect(isPromise({ [Symbol.toStringTag]: "Promise", then() {} })).toBe(false);
+    expect(isPromise(null)).toBe(false);
+
+    const value: unknown = Promise.resolve(1);
+    if (isPromise(value)) {
+      expectTypeOf(value).toEqualTypeOf<Promise<unknown>>();
+    }
+  });
+
+  it("recognizes built-ins created in another realm", () => {
+    const foreignDate = runInNewContext("new Date(0)");
+    const foreignRegExp = runInNewContext("/a/i");
+    const foreignMap = runInNewContext("new Map()");
+    const foreignSet = runInNewContext("new Set()");
+    const foreignError = runInNewContext("new Error('x')");
+    const foreignPromise = runInNewContext("Promise.resolve(1)");
+
+    expect(foreignDate instanceof Date).toBe(false);
+    expect(foreignError instanceof Error).toBe(false);
+    expect(foreignPromise instanceof Promise).toBe(false);
+
+    expect(isDate(foreignDate)).toBe(true);
+    expect(isRegExp(foreignRegExp)).toBe(true);
+    expect(isMap(foreignMap)).toBe(true);
+    expect(isSet(foreignSet)).toBe(true);
+    expect(isError(foreignError)).toBe(true);
+    expect(isPromise(foreignPromise)).toBe(true);
   });
 });

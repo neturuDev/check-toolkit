@@ -15,6 +15,10 @@ describe("OBJECT_TYPES constants", () => {
         "regExp",
         "map",
         "set",
+        "error",
+        "aggregateError",
+        "domException",
+        "promise",
       ].sort()
     );
   });
@@ -29,5 +33,9 @@ describe("OBJECT_TYPES constants", () => {
     expect(OBJECT_TYPES.regExp).toBe("[object RegExp]");
     expect(OBJECT_TYPES.map).toBe("[object Map]");
     expect(OBJECT_TYPES.set).toBe("[object Set]");
+    expect(OBJECT_TYPES.error).toBe("[object Error]");
+    expect(OBJECT_TYPES.aggregateError).toBe("[object AggregateError]");
+    expect(OBJECT_TYPES.domException).toBe("[object DOMException]");
+    expect(OBJECT_TYPES.promise).toBe("[object Promise]");
   });
 });
