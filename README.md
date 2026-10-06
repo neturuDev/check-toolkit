@@ -125,7 +125,9 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Promise
 
-- `delay` - Resolves after the specified milliseconds
+- `delay` - Resolves after the specified milliseconds. Non-finite or unschedulable delays throw `TypeError`
+- `timeout` - Settles with a thenable, or rejects with `TimeoutError` if it is still pending after `ms`. Invalid `ms` throws `TypeError` synchronously
+- `TimeoutError` - Rejection from `timeout` when the deadline wins, with `timeoutMs`
 
 ## AI / Agent integration
 

@@ -62,4 +62,4 @@ export { noop, identity, once } from "./function";
 
 export { clamp } from "./math";
 
-export { delay } from "./promise";
+export { delay, timeout, TimeoutError } from "./promise";
