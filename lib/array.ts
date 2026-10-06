@@ -1,3 +1,5 @@
+import { hasOwn, setOwn } from "./common";
+
 type Iteratee<T> = ((item: T) => PropertyKey) | keyof T;
 
 type GroupKey<T, P extends keyof T> = Extract<T[P], PropertyKey> extends never
@@ -93,8 +95,8 @@ export function groupBy<T>(
 
   for (const item of array) {
     const key = getKey(item);
-    if (!result[key]) {
-      result[key] = [];
+    if (!hasOwn(result, key)) {
+      setOwn(result, key, []);
     }
     result[key].push(item);
   }
@@ -126,7 +128,8 @@ export function countBy<T>(
 
   for (const item of array) {
     const key = getKey(item);
-    result[key] = (result[key] ?? 0) + 1;
+    const count = hasOwn(result, key) ? result[key] : 0;
+    setOwn(result, key, count + 1);
   }
 
   return result;
@@ -266,7 +269,7 @@ export function keyBy<T>(
 
   return array.reduce<Record<PropertyKey, T>>((result, item) => {
     const key = getKey(item);
-    result[key] = item;
+    setOwn(result, key, item);
     return result;
   }, {});
 }

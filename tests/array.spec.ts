@@ -98,6 +98,15 @@ describe("array helpers", () => {
     it("works with empty array", () => {
       expect(keyBy([], "id")).toEqual({});
     });
+
+    it("stores constructor and __proto__ as own keys", () => {
+      const keyed = keyBy(["constructor", "__proto__"], (item) => item);
+      expect(keyed.constructor).toBe("constructor");
+      expect(Object.getOwnPropertyDescriptor(keyed, "__proto__")?.value).toBe(
+        "__proto__",
+      );
+      expect(Object.getPrototypeOf(keyed)).toBe(Object.prototype);
+    });
   });
 
   describe("compact", () => {
@@ -127,6 +136,13 @@ describe("array helpers", () => {
         { type: "fruit", name: "banana" },
         { type: "veg", name: "carrot" },
       ];
+      const grouped = groupBy(["constructor", "__proto__"], (item) => item);
+      expect(grouped.constructor).toEqual(["constructor"]);
+      expect(Object.getOwnPropertyDescriptor(grouped, "__proto__")?.value).toEqual([
+        "__proto__",
+      ]);
+      expect(Object.getPrototypeOf(grouped)).toBe(Object.prototype);
+
       expect(groupBy(items, "type")).toEqual({
         fruit: [
           { type: "fruit", name: "apple" },
@@ -156,6 +172,16 @@ describe("array helpers", () => {
 
     it("returns empty object for empty array", () => {
       expect(countBy([], "id")).toEqual({});
+    });
+
+    it("keeps constructor and __proto__ as own keys", () => {
+      const counted = countBy(
+        ["constructor", "__proto__", "constructor"],
+        (item) => item,
+      );
+      expect(counted.constructor).toBe(2);
+      expect(Object.getOwnPropertyDescriptor(counted, "__proto__")?.value).toBe(1);
+      expect(Object.getPrototypeOf(counted)).toBe(Object.prototype);
     });
   });
 

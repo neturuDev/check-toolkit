@@ -21,6 +21,18 @@ describe("object helpers", () => {
       expect(pick(source, [123])).toEqual({ 123: "x" });
     });
 
+    it("picks __proto__ without polluting the result", () => {
+      const source = {};
+      const payload = { admin: true };
+      Object.defineProperty(source, "__proto__", {
+        value: payload,
+        enumerable: true,
+      });
+      const picked = pick(source, ["__proto__" as never]);
+      expect(Object.getPrototypeOf(picked)).toBe(Object.prototype);
+      expect(Object.getOwnPropertyDescriptor(picked, "__proto__")?.value).toBe(payload);
+    });
+
     it("picks symbol keys", () => {
       const sym = Symbol("id");
       const source = { a: 1, [sym]: 2 };

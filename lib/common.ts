@@ -5,11 +5,29 @@ export const getTag = (v: unknown): string => {
 };
 
 export const ownKeys = (o: object): (string | symbol)[] => {
-  return [...Object.keys(o), ...Object.getOwnPropertySymbols(o)];
+  return [
+    ...Object.keys(o),
+    ...Object.getOwnPropertySymbols(o).filter((key) =>
+      Object.prototype.propertyIsEnumerable.call(o, key),
+    ),
+  ];
 };
 
 export const hasOwn = (o: object, k: PropertyKey): boolean => {
   return Object.prototype.hasOwnProperty.call(o, k);
+};
+
+/**
+ * Defines an own enumerable data property.
+ * Plain assignment invokes `Object.prototype`'s `__proto__` setter.
+ */
+export const setOwn = (target: object, key: PropertyKey, value: unknown): void => {
+  Object.defineProperty(target, key, {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
 };
 
 export const isPrimitive = (

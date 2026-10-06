@@ -1,4 +1,4 @@
-import { hasOwn, ownKeys } from "./common";
+import { hasOwn, ownKeys, setOwn } from "./common";
 
 const getOwnPropertyKeys = <T extends object>(obj: T): (keyof T)[] =>
   ownKeys(obj) as (keyof T)[];
@@ -17,7 +17,7 @@ export const pick = <T extends object, K extends keyof T>(
 
   for (const key of keys) {
     if (hasOwn(obj, key)) {
-      result[key] = obj[key];
+      setOwn(result, key, obj[key]);
     }
   }
 
@@ -39,7 +39,7 @@ export const omit = <T extends object, K extends keyof T>(
 
   for (const key of getOwnPropertyKeys(obj)) {
     if (!exclude.has(key)) {
-      (result as T)[key] = obj[key];
+      setOwn(result, key, obj[key]);
     }
   }
 
@@ -61,7 +61,7 @@ export const pickBy = <T extends object>(
   for (const key of getOwnPropertyKeys(obj)) {
     const value = obj[key];
     if (predicate(value, key)) {
-      result[key] = value;
+      setOwn(result, key, value);
     }
   }
 
