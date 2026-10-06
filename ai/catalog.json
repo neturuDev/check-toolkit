@@ -17,7 +17,6 @@
     "flow",
     "flattenDeep",
     "zip",
-    "mapValues",
     "mapKeys",
     "has",
     "getOr",
@@ -619,6 +618,26 @@
       "summary": "Escapes RegExp special characters in a string.",
       "examples": ["escapeRegExp('[a-z]+') // => '\\\\[a-z\\\\]\\\\+'"],
       "antiPatterns": []
+    },
+    {
+      "name": "fromPairs",
+      "category": "object",
+      "signature": "<const T extends readonly (readonly [PropertyKey, unknown])[]>(pairs: T): { [E in T[number] as E[0]]: Extract<T[number], readonly [E[0], unknown]>[1] }",
+      "intents": ["object-from-pairs", "array-to-object"],
+      "narrows": null,
+      "summary": "Builds an object from key-value pairs. Later pairs overwrite earlier ones at runtime. A repeated key's type is the union of every value for that key. Unique literal keys stay precise.",
+      "examples": ["fromPairs([['a', 1], ['b', 2]]) // => { a: 1, b: 2 }"],
+      "antiPatterns": []
+    },
+    {
+      "name": "mapValues",
+      "category": "object",
+      "signature": "<T extends object, U>(object: T, iteratee: (value: T[keyof T], key: keyof T) => U): { [K in keyof T]: U }",
+      "intents": ["map-object-values"],
+      "narrows": null,
+      "summary": "Maps own enumerable string keys and own enumerable symbols. Inherited and non-enumerable keys are omitted. Does not mutate the input. The return type lists every keyof T, including inherited methods that are absent at runtime.",
+      "examples": ["mapValues({ a: 1, b: 2 }, (value) => value * 2) // => { a: 2, b: 4 }"],
+      "antiPatterns": ["No mapKeys. Rename keys outside the library.", "Do not rely on inherited methods appearing in the result; the type lists keyof T, the runtime copies own enumerable keys only."]
     },
     {
       "name": "pick",

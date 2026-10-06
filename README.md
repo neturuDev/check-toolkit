@@ -64,6 +64,8 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Object Operations
 
+- `fromPairs` - Builds an object from key-value pairs (last pair wins; a repeated key's type is a union)
+- `mapValues` - Maps own enumerable values. The type also lists inherited `keyof` members, which are absent at runtime
 - `pick` - Creates a new object with only the specified keys
 - `omit` - Creates a new object without the specified keys
 - `pickBy` - Creates a new object with entries that satisfy a predicate

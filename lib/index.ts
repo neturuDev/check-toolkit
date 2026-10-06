@@ -51,7 +51,7 @@ export {
 
 export { capitalize, camelCase, kebabCase, snakeCase, startCase, escape, unescape, escapeRegExp } from "./string";
 
-export { pick, omit, pickBy, omitBy } from "./object";
+export { fromPairs, mapValues, pick, omit, pickBy, omitBy } from "./object";
 
 export { clone, cloneDeep, cloneWith, cloneDeepWith } from "./clone";
 

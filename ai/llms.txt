@@ -21,7 +21,6 @@ Do not invent these APIs; they are not part of check-toolkit:
 - flow
 - flattenDeep
 - zip
-- mapValues
 - mapKeys
 - has
 - getOr
@@ -402,6 +401,25 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isMatch({ a: 1, b: 2 }, { a: 1 }) // true`
 
 ### object
+
+#### fromPairs
+
+- signature: `<const T extends readonly (readonly [PropertyKey, unknown])[]>(pairs: T): { [E in T[number] as E[0]]: Extract<T[number], readonly [E[0], unknown]>[1] }`
+- summary: Builds an object from key-value pairs. Later pairs overwrite earlier ones at runtime. A repeated key's type is the union of every value for that key. Unique literal keys stay precise.
+- intents: object-from-pairs, array-to-object
+- examples:
+  - `fromPairs([['a', 1], ['b', 2]]) // => { a: 1, b: 2 }`
+
+#### mapValues
+
+- signature: `<T extends object, U>(object: T, iteratee: (value: T[keyof T], key: keyof T) => U): { [K in keyof T]: U }`
+- summary: Maps own enumerable string keys and own enumerable symbols. Inherited and non-enumerable keys are omitted. Does not mutate the input. The return type lists every keyof T, including inherited methods that are absent at runtime.
+- intents: map-object-values
+- examples:
+  - `mapValues({ a: 1, b: 2 }, (value) => value * 2) // => { a: 2, b: 4 }`
+- anti-patterns:
+  - No mapKeys. Rename keys outside the library.
+  - Do not rely on inherited methods appearing in the result; the type lists keyof T, the runtime copies own enumerable keys only.
 
 #### pick
 
