@@ -84,10 +84,10 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `sum` - Sums numbers (`NaN` if a present value is not a number)
 - `sumBy` - Sums a numeric iteratee or property, skipping null and undefined
 - `difference` - Create an array of unique values not included in other arrays
-- `differenceBy` - Like difference but accepts iteratee
+- `differenceBy` - Like difference for one `values` array, compared by iteratee
 - `differenceWith` - Like difference but accepts comparator
 - `intersection` - Unique values included in every given array
-- `intersectionBy` - Like intersection but accepts an iteratee or property
+- `intersectionBy` - Intersection of `array` and one `values` array, compared by iteratee or property (no rest arrays, unlike `intersection`)
 - `keyBy` - Creates an object composed of keys generated from array
 
 ### String Operations

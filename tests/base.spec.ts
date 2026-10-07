@@ -318,10 +318,12 @@ describe("base utilities", () => {
     const foreignMap = runInNewContext("new Map()");
     const foreignSet = runInNewContext("new Set()");
     const foreignError = runInNewContext("new Error('x')");
+    const foreignAggregateError = runInNewContext("new AggregateError([], 'x')");
     const foreignPromise = runInNewContext("Promise.resolve(1)");
 
     expect(foreignDate instanceof Date).toBe(false);
     expect(foreignError instanceof Error).toBe(false);
+    expect(foreignAggregateError instanceof Error).toBe(false);
     expect(foreignPromise instanceof Promise).toBe(false);
 
     expect(isDate(foreignDate)).toBe(true);
@@ -329,6 +331,7 @@ describe("base utilities", () => {
     expect(isMap(foreignMap)).toBe(true);
     expect(isSet(foreignSet)).toBe(true);
     expect(isError(foreignError)).toBe(true);
+    expect(isError(foreignAggregateError)).toBe(true);
     expect(isPromise(foreignPromise)).toBe(true);
   });
 });

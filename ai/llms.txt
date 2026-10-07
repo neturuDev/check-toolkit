@@ -258,17 +258,19 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 #### isRegExp
 
 - signature: `(value: unknown): value is RegExp`
-- summary: True for RegExp, including one from another realm.
+- summary: True for RegExp, including one from another realm. Same-realm uses instanceof. Cross-realm matches the RegExp tag, test, and a prototype constructor named RegExp. That name match is sufficient, so another class named RegExp is accepted.
 - narrows: `RegExp`
 - intents: type-check, regexp-check
 - examples:
   - `isRegExp(/a/i) // true`
   - `isRegExp('a') // false`
+- anti-patterns:
+  - A class named RegExp with the RegExp tag and test is accepted cross-realm.
 
 #### isMap
 
 - signature: `(value: unknown): value is Map<unknown, unknown>`
-- summary: True for Map, including subclasses and a Map from another realm. WeakMap is false.
+- summary: True for Map, including subclasses and a Map from another realm. WeakMap is false. Cross-realm matches the Map tag, get, and a prototype constructor named Map. That name match is sufficient, so another class named Map is accepted.
 - narrows: `Map<unknown, unknown>`
 - intents: type-check, map-check
 - examples:
@@ -276,11 +278,12 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isMap(new WeakMap()) // false`
 - anti-patterns:
   - Does not preserve Map key and value type parameters
+  - A class named Map with the Map tag and get is accepted cross-realm.
 
 #### isSet
 
 - signature: `(value: unknown): value is Set<unknown>`
-- summary: True for Set, including subclasses and a Set from another realm. WeakSet is false.
+- summary: True for Set, including subclasses and a Set from another realm. WeakSet is false. Cross-realm matches the Set tag, has, and a prototype constructor named Set. That name match is sufficient, so another class named Set is accepted.
 - narrows: `Set<unknown>`
 - intents: type-check, set-check
 - examples:
@@ -288,6 +291,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isSet(new WeakSet()) // false`
 - anti-patterns:
   - Does not preserve the Set element type parameter
+  - A class named Set with the Set tag and has is accepted cross-realm.
 
 #### isError
 
@@ -304,7 +308,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 #### isPromise
 
 - signature: `(value: unknown): value is Promise<unknown>`
-- summary: True for a native Promise, including one from another realm. Plain thenables are false.
+- summary: True for a native Promise, including one from another realm. Plain thenables are false. Cross-realm matches the Promise tag, then, and a prototype constructor named Promise. That name match is sufficient, so another class named Promise is accepted.
 - narrows: `Promise<unknown>`
 - intents: type-check, promise-check
 - examples:
@@ -312,6 +316,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
   - `isPromise({ then() {} }) // false`
 - anti-patterns:
   - Thenables are not promises. timeout still accepts PromiseLike.
+  - A class named Promise with the Promise tag and then is accepted cross-realm.
 
 #### isUndefined
 
@@ -473,7 +478,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 #### differenceBy
 
 - signature: `<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]`
-- summary: Like difference, comparing by iteratee result.
+- summary: Like difference for one values array, comparing by iteratee result. Does not take a rest list of arrays.
 - intents: array-diff, set-difference
 - examples:
   - `differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]`

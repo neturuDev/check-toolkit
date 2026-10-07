@@ -214,9 +214,9 @@
       "signature": "(value: unknown): value is RegExp",
       "intents": ["type-check", "regexp-check"],
       "narrows": "RegExp",
-      "summary": "True for RegExp, including one from another realm.",
+      "summary": "True for RegExp, including one from another realm. Same-realm uses instanceof. Cross-realm matches the RegExp tag, test, and a prototype constructor named RegExp. That name match is sufficient, so another class named RegExp is accepted.",
       "examples": ["isRegExp(/a/i) // true", "isRegExp('a') // false"],
-      "antiPatterns": []
+      "antiPatterns": ["A class named RegExp with the RegExp tag and test is accepted cross-realm."]
     },
     {
       "name": "isMap",
@@ -224,9 +224,9 @@
       "signature": "(value: unknown): value is Map<unknown, unknown>",
       "intents": ["type-check", "map-check"],
       "narrows": "Map<unknown, unknown>",
-      "summary": "True for Map, including subclasses and a Map from another realm. WeakMap is false.",
+      "summary": "True for Map, including subclasses and a Map from another realm. WeakMap is false. Cross-realm matches the Map tag, get, and a prototype constructor named Map. That name match is sufficient, so another class named Map is accepted.",
       "examples": ["isMap(new Map()) // true", "isMap(new WeakMap()) // false"],
-      "antiPatterns": ["Does not preserve Map key and value type parameters"]
+      "antiPatterns": ["Does not preserve Map key and value type parameters", "A class named Map with the Map tag and get is accepted cross-realm."]
     },
     {
       "name": "isSet",
@@ -234,9 +234,9 @@
       "signature": "(value: unknown): value is Set<unknown>",
       "intents": ["type-check", "set-check"],
       "narrows": "Set<unknown>",
-      "summary": "True for Set, including subclasses and a Set from another realm. WeakSet is false.",
+      "summary": "True for Set, including subclasses and a Set from another realm. WeakSet is false. Cross-realm matches the Set tag, has, and a prototype constructor named Set. That name match is sufficient, so another class named Set is accepted.",
       "examples": ["isSet(new Set()) // true", "isSet(new WeakSet()) // false"],
-      "antiPatterns": ["Does not preserve the Set element type parameter"]
+      "antiPatterns": ["Does not preserve the Set element type parameter", "A class named Set with the Set tag and has is accepted cross-realm."]
     },
     {
       "name": "isError",
@@ -254,9 +254,9 @@
       "signature": "(value: unknown): value is Promise<unknown>",
       "intents": ["type-check", "promise-check"],
       "narrows": "Promise<unknown>",
-      "summary": "True for a native Promise, including one from another realm. Plain thenables are false.",
+      "summary": "True for a native Promise, including one from another realm. Plain thenables are false. Cross-realm matches the Promise tag, then, and a prototype constructor named Promise. That name match is sufficient, so another class named Promise is accepted.",
       "examples": ["isPromise(Promise.resolve(1)) // true", "isPromise({ then() {} }) // false"],
-      "antiPatterns": ["Thenables are not promises. timeout still accepts PromiseLike."]
+      "antiPatterns": ["Thenables are not promises. timeout still accepts PromiseLike.", "A class named Promise with the Promise tag and then is accepted cross-realm."]
     },
     {
       "name": "isUndefined",
@@ -380,7 +380,7 @@
       "signature": "<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]",
       "intents": ["array-diff", "set-difference"],
       "narrows": null,
-      "summary": "Like difference, comparing by iteratee result.",
+      "summary": "Like difference for one values array, comparing by iteratee result. Does not take a rest list of arrays.",
       "examples": ["differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]"],
       "antiPatterns": []
     },

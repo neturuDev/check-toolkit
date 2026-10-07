@@ -247,6 +247,8 @@ export const isDate = (value: unknown): value is Date => {
 
 /**
  * Checks if `value` is a `RegExp`, including one from another realm.
+ * Same-realm values use `instanceof`. Another realm matches when the tag is RegExp, `test` is a function, and a prototype constructor is named `"RegExp"`.
+ * That name match is the whole cross-realm test: a different class named `"RegExp"` with the same tag and method is accepted.
  *
  * @param value - Value to check
  * @returns `true` if `value` is a RegExp
@@ -267,6 +269,7 @@ export const isRegExp = (value: unknown): value is RegExp => {
 /**
  * Checks if `value` is a `Map`, including a subclass and a Map from another realm.
  * `WeakMap` is not a Map.
+ * Another realm matches when the tag is Map, `get` is a function, and a prototype constructor is named `"Map"`. A different class named `"Map"` with the same tag and method is accepted.
  *
  * @param value - Value to check
  * @returns `true` if `value` is a Map
@@ -287,6 +290,7 @@ export const isMap = (value: unknown): value is Map<unknown, unknown> => {
 /**
  * Checks if `value` is a `Set`, including a subclass and a Set from another realm.
  * `WeakSet` is not a Set.
+ * Another realm matches when the tag is Set, `has` is a function, and a prototype constructor is named `"Set"`. A different class named `"Set"` with the same tag and method is accepted.
  *
  * @param value - Value to check
  * @returns `true` if `value` is a Set
@@ -329,6 +333,7 @@ export const isError = (value: unknown): value is Error => {
 /**
  * Checks if `value` is a native `Promise`, including a subclass and one from another realm.
  * Plain thenables are not promises. `timeout` still accepts `PromiseLike`.
+ * Another realm matches when the tag is Promise, `then` is a function, and a prototype constructor is named `"Promise"`. A different class named `"Promise"` with the same tag and `then` is accepted.
  *
  * @param value - Value to check
  * @returns `true` if `value` is a Promise
