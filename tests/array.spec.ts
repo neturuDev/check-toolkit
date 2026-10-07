@@ -6,7 +6,6 @@ import {
   difference,
   differenceBy,
   differenceWith,
-  flatten,
   groupBy,
   intersection,
   intersectionBy,
@@ -318,27 +317,6 @@ describe("array helpers", () => {
       expect(chunk([1], Number.NaN)).toEqual([]);
       expect(chunk([1], Number.POSITIVE_INFINITY)).toEqual([]);
       expect(chunk([], 2)).toEqual([]);
-    });
-  });
-
-  describe("flatten", () => {
-    it("flattens one level and leaves deeper arrays nested", () => {
-      expect(flatten([1, [2, [3]], 4])).toEqual([1, 2, [3], 4]);
-      expect(flatten([[1, 2], [], [3]])).toEqual([1, 2, 3]);
-      expect(flatten(["ab", ["c"]])).toEqual(["ab", "c"]);
-      expect(flatten([])).toEqual([]);
-    });
-
-    it("does not flatten strings or array-like objects", () => {
-      const arrayLike = { length: 1, 0: "a" };
-      expect(flatten([arrayLike, ["b"]])).toEqual([arrayLike, "b"]);
-    });
-
-    it("unwraps one array level in the return type", () => {
-      expectTypeOf(flatten([1, [2, [3]], 4])).toEqualTypeOf<
-        (number | number[])[]
-      >();
-      expectTypeOf(flatten([[1, 2], [3]])).toEqualTypeOf<number[]>();
     });
   });
 

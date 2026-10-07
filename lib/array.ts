@@ -421,31 +421,6 @@ export const chunk = <T>(array: readonly T[], size: number): T[][] => {
   return result;
 };
 
-type Flattened<T> = T extends readonly (infer U)[] ? U : T;
-
-/**
- * Flattens `array` a single level. Nested arrays stay nested.
- * Only real arrays are flattened, not strings or array-like objects.
- *
- * @example
- * flatten([1, [2, [3]], 4]) // => [1, 2, [3], 4]
- */
-export const flatten = <T>(array: readonly T[]): Flattened<T>[] => {
-  const result: Flattened<T>[] = [];
-
-  for (const item of array) {
-    if (Array.isArray(item)) {
-      for (const nested of item) {
-        result.push(nested as Flattened<T>);
-      }
-    } else {
-      result.push(item as Flattened<T>);
-    }
-  }
-
-  return result;
-};
-
 const sumValues = <T>(
   array: readonly T[],
   getValue: (item: T) => unknown,

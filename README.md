@@ -43,7 +43,6 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `isNull` - Check if value is null
 - `isFunction` - Check if value is a function
 - `isNumber` - Check if value is a number
-- `isInteger` - Check if value is an integer (`Number.isInteger`)
 - `isString` - Check if value is a string
 - `isBoolean` - Check if value is a boolean
 - `isPlainObject` - Check if value is a plain object
@@ -64,7 +63,6 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Object Operations
 
-- `fromPairs` - Builds an object from key-value pairs (last pair wins; a repeated key's type is a union)
 - `mapValues` - Maps own enumerable values. The type also lists inherited `keyof` members, which are absent at runtime
 - `pick` - Creates a new object with only the specified keys
 - `omit` - Creates a new object without the specified keys
@@ -90,7 +88,6 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `differenceWith` - Like difference but accepts comparator
 - `intersection` - Unique values included in every given array
 - `intersectionBy` - Like intersection but accepts an iteratee or property
-- `flatten` - Flattens an array one level
 - `keyBy` - Creates an object composed of keys generated from array
 
 ### String Operations

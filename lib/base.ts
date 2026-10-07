@@ -164,23 +164,6 @@ export const isNumber = (value: any): value is number => {
 };
 
 /**
- * Checks if `value` is an integer (`Number.isInteger`).
- * Numeric strings, `NaN`, infinities, and bigints are not integers.
- * Values outside `Number.MAX_SAFE_INTEGER` can still match.
- *
- * @param value - Value to check
- * @returns `true` if `value` is an integer
- *
- * @example
- * isInteger(1) // true
- * isInteger(1.5) // false
- * isInteger("1") // false
- */
-export const isInteger = (value: unknown): value is number => {
-  return Number.isInteger(value);
-};
-
-/**
  * Checks if `value` is a string (primitive or `String` object).
  *
  * @param value - Value to check

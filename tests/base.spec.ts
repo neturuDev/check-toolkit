@@ -9,7 +9,6 @@ import {
   isEqual,
   isError,
   isFunction,
-  isInteger,
   isMap,
   isMatch,
   isNan,
@@ -198,26 +197,6 @@ describe("base utilities", () => {
     expect(isMatch(obj, { e: [1, 2, 3] })).toBe(true);
     expect(isMatch(obj, { e: [1, 2] })).toBe(false);
     expect(isMatch(obj, { f: 1 } as any)).toBe(false);
-  });
-
-  it("isInteger matches Number.isInteger", () => {
-    expect(isInteger(0)).toBe(true);
-    expect(isInteger(-3)).toBe(true);
-    expect(isInteger(1.0)).toBe(true);
-    expect(isInteger(Number.MAX_SAFE_INTEGER + 2)).toBe(true);
-
-    expect(isInteger(1.5)).toBe(false);
-    expect(isInteger(Number.NaN)).toBe(false);
-    expect(isInteger(Number.POSITIVE_INFINITY)).toBe(false);
-    expect(isInteger("1")).toBe(false);
-    expect(isInteger(true)).toBe(false);
-    expect(isInteger(new Number(1))).toBe(false);
-    expect(isInteger(1n)).toBe(false);
-
-    const value: unknown = 2;
-    if (isInteger(value)) {
-      expectTypeOf(value).toEqualTypeOf<number>();
-    }
   });
 
   it("isDate, isRegExp, isMap, and isSet narrow built-ins and reject lookalikes", () => {

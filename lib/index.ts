@@ -7,7 +7,6 @@ export {
   isNull,
   isFunction,
   isNumber,
-  isInteger,
   isString,
   isBoolean,
   isPlainObject,
@@ -34,7 +33,6 @@ export {
   difference,
   differenceBy,
   differenceWith,
-  flatten,
   groupBy,
   intersection,
   intersectionBy,
@@ -51,7 +49,7 @@ export {
 
 export { capitalize, camelCase, kebabCase, snakeCase, startCase, escape, unescape, escapeRegExp } from "./string";
 
-export { fromPairs, mapValues, pick, omit, pickBy, omitBy } from "./object";
+export { mapValues, pick, omit, pickBy, omitBy } from "./object";
 
 export { clone, cloneDeep, cloneWith, cloneDeepWith } from "./clone";
 

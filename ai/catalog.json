@@ -164,16 +164,6 @@
       "antiPatterns": []
     },
     {
-      "name": "isInteger",
-      "category": "type-guard",
-      "signature": "(value: unknown): value is number",
-      "intents": ["type-check", "integer-check"],
-      "narrows": "number",
-      "summary": "True if value is an integer (Number.isInteger). Numeric strings, NaN, infinities, and bigints are false. Values outside MAX_SAFE_INTEGER can still be true.",
-      "examples": ["isInteger(1) // true", "isInteger(1.5) // false", "isInteger('1') // false"],
-      "antiPatterns": ["Do not use isInteger to mean isSafeInteger"]
-    },
-    {
       "name": "isString",
       "category": "type-guard",
       "signature": "(value: unknown): value is string",
@@ -495,16 +485,6 @@
       "antiPatterns": ["Chunks are shallow copies"]
     },
     {
-      "name": "flatten",
-      "category": "array",
-      "signature": "<T>(array: readonly T[]): Array<T extends readonly (infer U)[] ? U : T>",
-      "intents": ["flatten-array"],
-      "narrows": null,
-      "summary": "Flattens one level. Nested arrays stay nested. Strings and array-like objects are not flattened.",
-      "examples": ["flatten([1, [2, [3]], 4]) // => [1, 2, [3], 4]"],
-      "antiPatterns": ["flattenDeep is not included"]
-    },
-    {
       "name": "sum",
       "category": "array",
       "signature": "(array: readonly number[]): number",
@@ -622,16 +602,6 @@
       "narrows": null,
       "summary": "Escapes RegExp special characters in a string.",
       "examples": ["escapeRegExp('[a-z]+') // => '\\\\[a-z\\\\]\\\\+'"],
-      "antiPatterns": []
-    },
-    {
-      "name": "fromPairs",
-      "category": "object",
-      "signature": "<const T extends readonly (readonly [PropertyKey, unknown])[]>(pairs: T): { [E in T[number] as E[0]]: Extract<T[number], readonly [E[0], unknown]>[1] }",
-      "intents": ["object-from-pairs", "array-to-object"],
-      "narrows": null,
-      "summary": "Builds an object from key-value pairs. Later pairs overwrite earlier ones at runtime. A repeated key's type is the union of every value for that key. Unique literal keys stay precise.",
-      "examples": ["fromPairs([['a', 1], ['b', 2]]) // => { a: 1, b: 2 }"],
       "antiPatterns": []
     },
     {

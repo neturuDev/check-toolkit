@@ -3,31 +3,6 @@ import { hasOwn, ownKeys, setOwn } from "./common";
 const getOwnPropertyKeys = <T extends object>(obj: T): (keyof T)[] =>
   ownKeys(obj) as (keyof T)[];
 
-type FromPairs<T extends readonly (readonly [PropertyKey, unknown])[]> = {
-  [E in T[number] as E[0]]: Extract<T[number], readonly [E[0], unknown]>[1];
-};
-
-/**
- * Builds an object from key-value pairs. Later pairs overwrite earlier ones with the same key.
- * Fresh pair lists keep literal key and value types. A repeated key's type is the union of every value for that key, while the runtime value is the last one.
- *
- * @example
- * fromPairs([["a", 1], ["b", 2]]) // => { a: 1, b: 2 }
- */
-export const fromPairs = <
-  const T extends readonly (readonly [PropertyKey, unknown])[],
->(
-  pairs: T,
-): FromPairs<T> => {
-  const result = {} as FromPairs<T>;
-
-  for (const [key, value] of pairs) {
-    setOwn(result, key, value);
-  }
-
-  return result;
-};
-
 /**
  * Maps own enumerable string keys and own enumerable symbols.
  * Inherited properties and non-enumerable keys are omitted. The input object is not mutated.
