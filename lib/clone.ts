@@ -1,3 +1,5 @@
+import { setOwn } from "./common";
+
 /**
  * Creates a shallow clone of `value`.
  *
@@ -81,7 +83,7 @@ const baseClone = <T>(
   result = {};
   stack.set(value as any, result);
   for (const [k, v] of Object.entries(value as any)) {
-    (result as any)[k] = isDeep ? baseClone(v, true, customizer, stack) : v;
+    setOwn(result, k, isDeep ? baseClone(v, true, customizer, stack) : v);
   }
 
   return result;

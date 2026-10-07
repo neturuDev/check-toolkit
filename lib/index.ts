@@ -10,6 +10,12 @@ export {
   isString,
   isBoolean,
   isPlainObject,
+  isDate,
+  isRegExp,
+  isMap,
+  isSet,
+  isError,
+  isPromise,
   isUndefined,
   isNotUndefined,
   isNil,
@@ -21,22 +27,29 @@ export {
 } from "./base";
 
 export {
+  chunk,
   compact,
   countBy,
   difference,
   differenceBy,
   differenceWith,
   groupBy,
+  intersection,
+  intersectionBy,
   keyBy,
+  maxBy,
+  minBy,
   partition,
   sortBy,
+  sum,
+  sumBy,
   uniq,
   uniqBy,
 } from "./array";
 
 export { capitalize, camelCase, kebabCase, snakeCase, startCase, escape, unescape, escapeRegExp } from "./string";
 
-export { pick, omit, pickBy, omitBy } from "./object";
+export { mapValues, pick, omit, pickBy, omitBy } from "./object";
 
 export { clone, cloneDeep, cloneWith, cloneDeepWith } from "./clone";
 
@@ -47,4 +60,4 @@ export { noop, identity, once } from "./function";
 
 export { clamp } from "./math";
 
-export { delay } from "./promise";
+export { delay, timeout, TimeoutError } from "./promise";

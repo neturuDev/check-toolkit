@@ -15,11 +15,8 @@
     "curry",
     "partial",
     "flow",
-    "flatten",
     "flattenDeep",
-    "chunk",
     "zip",
-    "mapValues",
     "mapKeys",
     "has",
     "getOr",
@@ -28,10 +25,7 @@
     "template",
     "random",
     "range",
-    "sum",
     "mean",
-    "maxBy",
-    "minBy",
     "orderBy",
     "sample",
     "shuffle"
@@ -66,6 +60,16 @@
       "id": "debounce-input",
       "intent": "Delay rapid calls (search, resize) with cancel/flush",
       "code": "const search = debounce((q: string) => fetchResults(q), 300);"
+    },
+    {
+      "id": "sum-by",
+      "intent": "Sum a numeric field, skipping null and undefined",
+      "code": "const total = sumBy(items, \"price\");"
+    },
+    {
+      "id": "promise-timeout",
+      "intent": "Reject a promise that does not settle in time",
+      "code": "const body = await timeout(fetch(url), 3000);"
     },
     {
       "id": "object-vs-plain",
@@ -195,6 +199,66 @@
       ]
     },
     {
+      "name": "isDate",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Date",
+      "intents": ["type-check", "date-check"],
+      "narrows": "Date",
+      "summary": "True for Date, including Invalid Date, a subclass, and a Date from another realm. Same-realm uses instanceof. Cross-realm matches the Date tag, getTime, and a prototype constructor named Date. That name match is sufficient, so another class named Date is accepted.",
+      "examples": ["isDate(new Date()) // true", "isDate(new Date(NaN)) // true", "isDate('2020-01-01') // false"],
+      "antiPatterns": ["Invalid Date still returns true. Check Number.isNaN(date.getTime()) for a real timestamp.", "A class with the Date tag and getTime is rejected only when its constructor name is not Date."]
+    },
+    {
+      "name": "isRegExp",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is RegExp",
+      "intents": ["type-check", "regexp-check"],
+      "narrows": "RegExp",
+      "summary": "True for RegExp, including one from another realm. Same-realm uses instanceof. Cross-realm matches the RegExp tag, test, and a prototype constructor named RegExp. That name match is sufficient, so another class named RegExp is accepted.",
+      "examples": ["isRegExp(/a/i) // true", "isRegExp('a') // false"],
+      "antiPatterns": ["A class named RegExp with the RegExp tag and test is accepted cross-realm."]
+    },
+    {
+      "name": "isMap",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Map<unknown, unknown>",
+      "intents": ["type-check", "map-check"],
+      "narrows": "Map<unknown, unknown>",
+      "summary": "True for Map, including subclasses and a Map from another realm. WeakMap is false. Cross-realm matches the Map tag, get, and a prototype constructor named Map. That name match is sufficient, so another class named Map is accepted.",
+      "examples": ["isMap(new Map()) // true", "isMap(new WeakMap()) // false"],
+      "antiPatterns": ["Does not preserve Map key and value type parameters", "A class named Map with the Map tag and get is accepted cross-realm."]
+    },
+    {
+      "name": "isSet",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Set<unknown>",
+      "intents": ["type-check", "set-check"],
+      "narrows": "Set<unknown>",
+      "summary": "True for Set, including subclasses and a Set from another realm. WeakSet is false. Cross-realm matches the Set tag, has, and a prototype constructor named Set. That name match is sufficient, so another class named Set is accepted.",
+      "examples": ["isSet(new Set()) // true", "isSet(new WeakSet()) // false"],
+      "antiPatterns": ["Does not preserve the Set element type parameter", "A class named Set with the Set tag and has is accepted cross-realm."]
+    },
+    {
+      "name": "isError",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Error",
+      "intents": ["type-check", "error-check"],
+      "narrows": "Error",
+      "summary": "True for Error, subclasses, and DOMException. Same-realm uses instanceof. Cross-realm also needs an error tag, string name and message, and a prototype constructor named Error. A class named Error that meets those checks is accepted. A plain { name, message } object is false.",
+      "examples": ["isError(new TypeError('x')) // true", "isError({ message: 'x', name: 'Error' }) // false"],
+      "antiPatterns": ["Do not duck-type errors from name and message alone"]
+    },
+    {
+      "name": "isPromise",
+      "category": "type-guard",
+      "signature": "(value: unknown): value is Promise<unknown>",
+      "intents": ["type-check", "promise-check"],
+      "narrows": "Promise<unknown>",
+      "summary": "True for a native Promise, including one from another realm. Plain thenables are false. Cross-realm matches the Promise tag, then, and a prototype constructor named Promise. That name match is sufficient, so another class named Promise is accepted.",
+      "examples": ["isPromise(Promise.resolve(1)) // true", "isPromise({ then() {} }) // false"],
+      "antiPatterns": ["Thenables are not promises. timeout still accepts PromiseLike.", "A class named Promise with the Promise tag and then is accepted cross-realm."]
+    },
+    {
       "name": "isUndefined",
       "category": "type-guard",
       "signature": "(value: unknown): value is undefined",
@@ -316,7 +380,7 @@
       "signature": "<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]",
       "intents": ["array-diff", "set-difference"],
       "narrows": null,
-      "summary": "Like difference, comparing by iteratee result.",
+      "summary": "Like difference for one values array, comparing by iteratee result. Does not take a rest list of arrays.",
       "examples": ["differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]"],
       "antiPatterns": []
     },
@@ -389,6 +453,76 @@
       "summary": "Creates an array with unique values by iteratee.",
       "examples": ["uniqBy([2.1, 1.2, 2.3], Math.floor) // => [2.1, 1.2]"],
       "antiPatterns": []
+    },
+    {
+      "name": "intersection",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], ...others: readonly (readonly T[])[]): T[]",
+      "intents": ["array-intersection", "set-intersection"],
+      "narrows": null,
+      "summary": "Unique values from array that are included in every other array (SameValueZero). Order follows the first array. With no other arrays, returns unique values of array.",
+      "examples": ["intersection([2, 1, 2], [1, 2], [2, 3]) // => [2]"],
+      "antiPatterns": ["Objects are compared by reference. Use intersectionBy for a property."]
+    },
+    {
+      "name": "intersectionBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], values: readonly T[], iteratee: ((value: T) => unknown) | keyof T): T[]",
+      "intents": ["array-intersection", "set-intersection"],
+      "narrows": null,
+      "summary": "Unique values from array that also appear in one values array, compared by iteratee or property key. Unlike intersection, this does not take a rest list of arrays. Keeps the first match from array.",
+      "examples": ["intersectionBy([{ id: 1 }, { id: 2 }], [{ id: 2 }], 'id')"],
+      "antiPatterns": []
+    },
+    {
+      "name": "chunk",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], size: number): T[][]",
+      "intents": ["chunk-array", "batch-array"],
+      "narrows": null,
+      "summary": "Splits array into chunks of size. Size is truncated toward zero. Non-finite size, or truncated size below 1, returns []. Does not mutate the input.",
+      "examples": ["chunk([1, 2, 3, 4, 5], 2) // => [[1, 2], [3, 4], [5]]"],
+      "antiPatterns": ["Chunks are shallow copies"]
+    },
+    {
+      "name": "sum",
+      "category": "array",
+      "signature": "(array: readonly number[]): number",
+      "intents": ["sum-array"],
+      "narrows": null,
+      "summary": "Sums numbers. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN. An empty array is 0.",
+      "examples": ["sum([1, 2, 3]) // => 6"],
+      "antiPatterns": ["No mean helper. Use sumBy for object fields."]
+    },
+    {
+      "name": "sumBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => number | null | undefined): number; property overload accepts only keys whose NonNullable value extends number",
+      "intents": ["sum-array", "aggregate-array"],
+      "narrows": null,
+      "summary": "Sums numbers produced by iteratee or a numeric property. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN.",
+      "examples": ["sumBy([{ price: 1 }, { price: null }, { price: 2 }], 'price') // => 3"],
+      "antiPatterns": ["Property keys must be numeric (or nullish). A string field is a type error."]
+    },
+    {
+      "name": "minBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number",
+      "intents": ["min-by", "extremum"],
+      "narrows": null,
+      "summary": "First element with the smallest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.",
+      "examples": ["minBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 20 }"],
+      "antiPatterns": ["Returns the element, not the extreme value"]
+    },
+    {
+      "name": "maxBy",
+      "category": "array",
+      "signature": "<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number",
+      "intents": ["max-by", "extremum"],
+      "narrows": null,
+      "summary": "First element with the largest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.",
+      "examples": ["maxBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 30 }"],
+      "antiPatterns": ["Returns the element, not the extreme value. No multi-key orderBy."]
     },
     {
       "name": "capitalize",
@@ -469,6 +603,16 @@
       "summary": "Escapes RegExp special characters in a string.",
       "examples": ["escapeRegExp('[a-z]+') // => '\\\\[a-z\\\\]\\\\+'"],
       "antiPatterns": []
+    },
+    {
+      "name": "mapValues",
+      "category": "object",
+      "signature": "<T extends object, U>(object: T, iteratee: (value: T[keyof T], key: keyof T) => U): { [K in keyof T]: U }",
+      "intents": ["map-object-values"],
+      "narrows": null,
+      "summary": "Maps own enumerable string keys and own enumerable symbols. Inherited and non-enumerable keys are omitted. Does not mutate the input. The return type lists every keyof T, including inherited methods that are absent at runtime.",
+      "examples": ["mapValues({ a: 1, b: 2 }, (value) => value * 2) // => { a: 2, b: 4 }"],
+      "antiPatterns": ["No mapKeys. Rename keys outside the library.", "Do not rely on inherited methods appearing in the result; the type lists keyof T, the runtime copies own enumerable keys only."]
     },
     {
       "name": "pick",
@@ -608,7 +752,7 @@
       "narrows": null,
       "summary": "Clamps value between min and max (order-independent bounds).",
       "examples": ["clamp(15, 0, 10) // => 10"],
-      "antiPatterns": ["No sum/mean/range helpers in this library"]
+      "antiPatterns": ["No mean/range helpers. Use sum or sumBy for totals."]
     },
     {
       "name": "delay",
@@ -616,9 +760,29 @@
       "signature": "(ms: number): Promise<void>",
       "intents": ["sleep", "delay-async"],
       "narrows": null,
-      "summary": "Resolves after the specified milliseconds.",
+      "summary": "Resolves after ms. Negative and non-finite ms (NaN, Infinity) wait 0. Delays above the 32-bit timer limit are split so the host timer does not overflow.",
       "examples": ["await delay(300);"],
-      "antiPatterns": []
+      "antiPatterns": ["delay(Infinity) does not wait forever. It waits 0."]
+    },
+    {
+      "name": "timeout",
+      "category": "promise",
+      "signature": "<T>(promise: PromiseLike<T>, ms: number): Promise<T>",
+      "intents": ["timeout", "promise-race"],
+      "narrows": null,
+      "summary": "Settles with promise unless it is still pending after ms. Negative ms waits 0. A non-finite ms or a non-thenable rejects with TypeError. Delays above the 32-bit timer limit are split so the host timer does not overflow. The timer is cleared when promise settles first.",
+      "examples": ["await timeout(fetch(url), 3000);"],
+      "antiPatterns": ["Catch TimeoutError to tell a deadline from the original rejection", "timeout only stops waiting. It does not cancel the underlying operation"]
+    },
+    {
+      "name": "TimeoutError",
+      "category": "promise",
+      "signature": "new (timeoutMs: number) => TimeoutError",
+      "intents": ["timeout", "error-check"],
+      "narrows": null,
+      "summary": "Rejection from timeout when the deadline wins. timeoutMs is the wait that was used. message is 'Timed out after <ms>ms'. Invalid arguments reject with TypeError, not TimeoutError.",
+      "examples": ["error instanceof TimeoutError"],
+      "antiPatterns": ["Do not treat TypeError from invalid arguments as a timeout. Only TimeoutError means the deadline won."]
     }
   ]
 }

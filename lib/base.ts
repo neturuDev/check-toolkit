@@ -1,5 +1,47 @@
 import { OBJECT_TYPES } from "./constants";
-import { baseIsEqual, baseIsMatch } from "./common";
+import { baseIsEqual, baseIsMatch, getTag } from "./common";
+
+const ERROR_TAGS = new Set<string>([
+  OBJECT_TYPES.error,
+  OBJECT_TYPES.aggregateError,
+  OBJECT_TYPES.domException,
+]);
+
+const hasMethod = (value: object, key: PropertyKey): boolean =>
+  typeof (value as Record<PropertyKey, unknown>)[key] === "function";
+
+const MAX_PROTO_DEPTH = 32;
+
+/** True when some prototype's constructor still has the built-in name (`Date`, `Map`, …). */
+const prototypeChainHasName = (value: object, name: string): boolean => {
+  let proto = Object.getPrototypeOf(value) as object | null;
+
+  for (
+    let depth = 0;
+    proto !== null && proto !== Object.prototype && depth < MAX_PROTO_DEPTH;
+    depth += 1
+  ) {
+    const constructor = (proto as { constructor?: { name?: unknown } }).constructor;
+    if (typeof constructor === "function" && constructor.name === name) return true;
+    proto = Object.getPrototypeOf(proto) as object | null;
+  }
+
+  return false;
+};
+
+/**
+ * Cross-realm brand check. Same-realm values should use `instanceof` first so a
+ * subclass still matches after it changes `Symbol.toStringTag`.
+ */
+const matchesBrand = (
+  value: object,
+  tag: string,
+  method: PropertyKey,
+  name: string,
+): boolean =>
+  getTag(value) === tag &&
+  hasMethod(value, method) &&
+  prototypeChainHasName(value, name);
 
 /**
  * Checks if `value` is a symbol.
@@ -179,6 +221,134 @@ export const isPlainObject = (
   }
 
   return Object.prototype.toString.call(value) === OBJECT_TYPES.object;
+};
+
+/**
+ * Checks if `value` is a `Date`, including an Invalid Date, a subclass, and a Date from another realm.
+ * Same-realm values use `instanceof`. Another realm matches when the tag is Date, `getTime` is a function, and a prototype constructor is named `"Date"`.
+ * That name match is the whole cross-realm test: a different class whose constructor is also named `"Date"` is accepted. A class with any other name is not.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a Date
+ *
+ * @example
+ * isDate(new Date()) // true
+ * isDate(new Date(Number.NaN)) // true
+ * isDate("2020-01-01") // false
+ */
+export const isDate = (value: unknown): value is Date => {
+  if (value instanceof Date) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    matchesBrand(value, OBJECT_TYPES.date, "getTime", "Date")
+  );
+};
+
+/**
+ * Checks if `value` is a `RegExp`, including one from another realm.
+ * Same-realm values use `instanceof`. Another realm matches when the tag is RegExp, `test` is a function, and a prototype constructor is named `"RegExp"`.
+ * That name match is the whole cross-realm test: a different class named `"RegExp"` with the same tag and method is accepted.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a RegExp
+ *
+ * @example
+ * isRegExp(/a/i) // true
+ * isRegExp("a") // false
+ */
+export const isRegExp = (value: unknown): value is RegExp => {
+  if (value instanceof RegExp) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    matchesBrand(value, OBJECT_TYPES.regExp, "test", "RegExp")
+  );
+};
+
+/**
+ * Checks if `value` is a `Map`, including a subclass and a Map from another realm.
+ * `WeakMap` is not a Map.
+ * Another realm matches when the tag is Map, `get` is a function, and a prototype constructor is named `"Map"`. A different class named `"Map"` with the same tag and method is accepted.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a Map
+ *
+ * @example
+ * isMap(new Map()) // true
+ * isMap(new WeakMap()) // false
+ */
+export const isMap = (value: unknown): value is Map<unknown, unknown> => {
+  if (value instanceof Map) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    matchesBrand(value, OBJECT_TYPES.map, "get", "Map")
+  );
+};
+
+/**
+ * Checks if `value` is a `Set`, including a subclass and a Set from another realm.
+ * `WeakSet` is not a Set.
+ * Another realm matches when the tag is Set, `has` is a function, and a prototype constructor is named `"Set"`. A different class named `"Set"` with the same tag and method is accepted.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a Set
+ *
+ * @example
+ * isSet(new Set()) // true
+ * isSet(new WeakSet()) // false
+ */
+export const isSet = (value: unknown): value is Set<unknown> => {
+  if (value instanceof Set) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    matchesBrand(value, OBJECT_TYPES.set, "has", "Set")
+  );
+};
+
+/**
+ * Checks if `value` is an `Error` (including subclasses and `DOMException`).
+ * Same-realm errors use `instanceof`. Another realm also needs an error tag, string `name` and `message`, and a prototype constructor named `"Error"`.
+ * A class named `"Error"` that satisfies those checks is accepted. A plain `{ name, message }` object is not.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is an Error
+ *
+ * @example
+ * isError(new TypeError("x")) // true
+ * isError({ message: "x", name: "Error" }) // false
+ */
+export const isError = (value: unknown): value is Error => {
+  if (value instanceof Error) return true;
+  if (typeof value !== "object" || value === null) return false;
+  if (!ERROR_TAGS.has(getTag(value))) return false;
+  if (!prototypeChainHasName(value, "Error")) return false;
+
+  const error = value as { name?: unknown; message?: unknown };
+  return typeof error.name === "string" && typeof error.message === "string";
+};
+
+/**
+ * Checks if `value` is a native `Promise`, including a subclass and one from another realm.
+ * Plain thenables are not promises. `timeout` still accepts `PromiseLike`.
+ * Another realm matches when the tag is Promise, `then` is a function, and a prototype constructor is named `"Promise"`. A different class named `"Promise"` with the same tag and `then` is accepted.
+ *
+ * @param value - Value to check
+ * @returns `true` if `value` is a Promise
+ *
+ * @example
+ * isPromise(Promise.resolve(1)) // true
+ * isPromise({ then() {} }) // false
+ */
+export const isPromise = (value: unknown): value is Promise<unknown> => {
+  if (value instanceof Promise) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    matchesBrand(value, OBJECT_TYPES.promise, "then", "Promise")
+  );
 };
 
 /**

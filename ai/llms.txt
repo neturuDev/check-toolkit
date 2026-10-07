@@ -19,11 +19,8 @@ Do not invent these APIs; they are not part of check-toolkit:
 - curry
 - partial
 - flow
-- flatten
 - flattenDeep
-- chunk
 - zip
-- mapValues
 - mapKeys
 - has
 - getOr
@@ -32,10 +29,7 @@ Do not invent these APIs; they are not part of check-toolkit:
 - template
 - random
 - range
-- sum
 - mean
-- maxBy
-- minBy
 - orderBy
 - sample
 - shuffle
@@ -91,6 +85,22 @@ Delay rapid calls (search, resize) with cancel/flush
 
 ```ts
 const search = debounce((q: string) => fetchResults(q), 300);
+```
+
+### sum-by
+
+Sum a numeric field, skipping null and undefined
+
+```ts
+const total = sumBy(items, "price");
+```
+
+### promise-timeout
+
+Reject a promise that does not settle in time
+
+```ts
+const body = await timeout(fetch(url), 3000);
 ```
 
 ### object-vs-plain
@@ -231,6 +241,83 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - anti-patterns:
   - typeof x === 'object' && x !== null allows arrays and class instances
 
+#### isDate
+
+- signature: `(value: unknown): value is Date`
+- summary: True for Date, including Invalid Date, a subclass, and a Date from another realm. Same-realm uses instanceof. Cross-realm matches the Date tag, getTime, and a prototype constructor named Date. That name match is sufficient, so another class named Date is accepted.
+- narrows: `Date`
+- intents: type-check, date-check
+- examples:
+  - `isDate(new Date()) // true`
+  - `isDate(new Date(NaN)) // true`
+  - `isDate('2020-01-01') // false`
+- anti-patterns:
+  - Invalid Date still returns true. Check Number.isNaN(date.getTime()) for a real timestamp.
+  - A class with the Date tag and getTime is rejected only when its constructor name is not Date.
+
+#### isRegExp
+
+- signature: `(value: unknown): value is RegExp`
+- summary: True for RegExp, including one from another realm. Same-realm uses instanceof. Cross-realm matches the RegExp tag, test, and a prototype constructor named RegExp. That name match is sufficient, so another class named RegExp is accepted.
+- narrows: `RegExp`
+- intents: type-check, regexp-check
+- examples:
+  - `isRegExp(/a/i) // true`
+  - `isRegExp('a') // false`
+- anti-patterns:
+  - A class named RegExp with the RegExp tag and test is accepted cross-realm.
+
+#### isMap
+
+- signature: `(value: unknown): value is Map<unknown, unknown>`
+- summary: True for Map, including subclasses and a Map from another realm. WeakMap is false. Cross-realm matches the Map tag, get, and a prototype constructor named Map. That name match is sufficient, so another class named Map is accepted.
+- narrows: `Map<unknown, unknown>`
+- intents: type-check, map-check
+- examples:
+  - `isMap(new Map()) // true`
+  - `isMap(new WeakMap()) // false`
+- anti-patterns:
+  - Does not preserve Map key and value type parameters
+  - A class named Map with the Map tag and get is accepted cross-realm.
+
+#### isSet
+
+- signature: `(value: unknown): value is Set<unknown>`
+- summary: True for Set, including subclasses and a Set from another realm. WeakSet is false. Cross-realm matches the Set tag, has, and a prototype constructor named Set. That name match is sufficient, so another class named Set is accepted.
+- narrows: `Set<unknown>`
+- intents: type-check, set-check
+- examples:
+  - `isSet(new Set()) // true`
+  - `isSet(new WeakSet()) // false`
+- anti-patterns:
+  - Does not preserve the Set element type parameter
+  - A class named Set with the Set tag and has is accepted cross-realm.
+
+#### isError
+
+- signature: `(value: unknown): value is Error`
+- summary: True for Error, subclasses, and DOMException. Same-realm uses instanceof. Cross-realm also needs an error tag, string name and message, and a prototype constructor named Error. A class named Error that meets those checks is accepted. A plain { name, message } object is false.
+- narrows: `Error`
+- intents: type-check, error-check
+- examples:
+  - `isError(new TypeError('x')) // true`
+  - `isError({ message: 'x', name: 'Error' }) // false`
+- anti-patterns:
+  - Do not duck-type errors from name and message alone
+
+#### isPromise
+
+- signature: `(value: unknown): value is Promise<unknown>`
+- summary: True for a native Promise, including one from another realm. Plain thenables are false. Cross-realm matches the Promise tag, then, and a prototype constructor named Promise. That name match is sufficient, so another class named Promise is accepted.
+- narrows: `Promise<unknown>`
+- intents: type-check, promise-check
+- examples:
+  - `isPromise(Promise.resolve(1)) // true`
+  - `isPromise({ then() {} }) // false`
+- anti-patterns:
+  - Thenables are not promises. timeout still accepts PromiseLike.
+  - A class named Promise with the Promise tag and then is accepted cross-realm.
+
 #### isUndefined
 
 - signature: `(value: unknown): value is undefined`
@@ -315,6 +402,17 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 
 ### object
 
+#### mapValues
+
+- signature: `<T extends object, U>(object: T, iteratee: (value: T[keyof T], key: keyof T) => U): { [K in keyof T]: U }`
+- summary: Maps own enumerable string keys and own enumerable symbols. Inherited and non-enumerable keys are omitted. Does not mutate the input. The return type lists every keyof T, including inherited methods that are absent at runtime.
+- intents: map-object-values
+- examples:
+  - `mapValues({ a: 1, b: 2 }, (value) => value * 2) // => { a: 2, b: 4 }`
+- anti-patterns:
+  - No mapKeys. Rename keys outside the library.
+  - Do not rely on inherited methods appearing in the result; the type lists keyof T, the runtime copies own enumerable keys only.
+
 #### pick
 
 - signature: `<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K>`
@@ -380,7 +478,7 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 #### differenceBy
 
 - signature: `<T>(array: T[], values: T[], iteratee: (value: T) => unknown): T[]`
-- summary: Like difference, comparing by iteratee result.
+- summary: Like difference for one values array, comparing by iteratee result. Does not take a rest list of arrays.
 - intents: array-diff, set-difference
 - examples:
   - `differenceBy([2.1, 1.2], [2.3], Math.floor) // => [1.2]`
@@ -442,6 +540,74 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - intents: unique-values, dedupe-array
 - examples:
   - `uniqBy([2.1, 1.2, 2.3], Math.floor) // => [2.1, 1.2]`
+
+#### intersection
+
+- signature: `<T>(array: readonly T[], ...others: readonly (readonly T[])[]): T[]`
+- summary: Unique values from array that are included in every other array (SameValueZero). Order follows the first array. With no other arrays, returns unique values of array.
+- intents: array-intersection, set-intersection
+- examples:
+  - `intersection([2, 1, 2], [1, 2], [2, 3]) // => [2]`
+- anti-patterns:
+  - Objects are compared by reference. Use intersectionBy for a property.
+
+#### intersectionBy
+
+- signature: `<T>(array: readonly T[], values: readonly T[], iteratee: ((value: T) => unknown) | keyof T): T[]`
+- summary: Unique values from array that also appear in one values array, compared by iteratee or property key. Unlike intersection, this does not take a rest list of arrays. Keeps the first match from array.
+- intents: array-intersection, set-intersection
+- examples:
+  - `intersectionBy([{ id: 1 }, { id: 2 }], [{ id: 2 }], 'id')`
+
+#### chunk
+
+- signature: `<T>(array: readonly T[], size: number): T[][]`
+- summary: Splits array into chunks of size. Size is truncated toward zero. Non-finite size, or truncated size below 1, returns []. Does not mutate the input.
+- intents: chunk-array, batch-array
+- examples:
+  - `chunk([1, 2, 3, 4, 5], 2) // => [[1, 2], [3, 4], [5]]`
+- anti-patterns:
+  - Chunks are shallow copies
+
+#### sum
+
+- signature: `(array: readonly number[]): number`
+- summary: Sums numbers. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN. An empty array is 0.
+- intents: sum-array
+- examples:
+  - `sum([1, 2, 3]) // => 6`
+- anti-patterns:
+  - No mean helper. Use sumBy for object fields.
+
+#### sumBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => number | null | undefined): number; property overload accepts only keys whose NonNullable value extends number`
+- summary: Sums numbers produced by iteratee or a numeric property. null and undefined are skipped. Any other non-number, including NaN, makes the result NaN.
+- intents: sum-array, aggregate-array
+- examples:
+  - `sumBy([{ price: 1 }, { price: null }, { price: 2 }], 'price') // => 3`
+- anti-patterns:
+  - Property keys must be numeric (or nullish). A string field is a type error.
+
+#### minBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number`
+- summary: First element with the smallest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.
+- intents: min-by, extremum
+- examples:
+  - `minBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 20 }`
+- anti-patterns:
+  - Returns the element, not the extreme value
+
+#### maxBy
+
+- signature: `<T>(array: readonly T[], iteratee: (item: T) => string | number | null | undefined): T | undefined; property overload accepts only keys whose NonNullable value extends string | number`
+- summary: First element with the largest comparable iteratee result. null, undefined, and NaN are ignored. Returns undefined when nothing is comparable. Comparison matches sortBy.
+- intents: max-by, extremum
+- examples:
+  - `maxBy([{ age: 30 }, { age: 20 }], 'age') // => { age: 30 }`
+- anti-patterns:
+  - Returns the element, not the extreme value. No multi-key orderBy.
 
 ### string
 
@@ -601,14 +767,37 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 - examples:
   - `clamp(15, 0, 10) // => 10`
 - anti-patterns:
-  - No sum/mean/range helpers in this library
+  - No mean/range helpers. Use sum or sumBy for totals.
 
 ### promise
 
 #### delay
 
 - signature: `(ms: number): Promise<void>`
-- summary: Resolves after the specified milliseconds.
+- summary: Resolves after ms. Negative and non-finite ms (NaN, Infinity) wait 0. Delays above the 32-bit timer limit are split so the host timer does not overflow.
 - intents: sleep, delay-async
 - examples:
   - `await delay(300);`
+- anti-patterns:
+  - delay(Infinity) does not wait forever. It waits 0.
+
+#### timeout
+
+- signature: `<T>(promise: PromiseLike<T>, ms: number): Promise<T>`
+- summary: Settles with promise unless it is still pending after ms. Negative ms waits 0. A non-finite ms or a non-thenable rejects with TypeError. Delays above the 32-bit timer limit are split so the host timer does not overflow. The timer is cleared when promise settles first.
+- intents: timeout, promise-race
+- examples:
+  - `await timeout(fetch(url), 3000);`
+- anti-patterns:
+  - Catch TimeoutError to tell a deadline from the original rejection
+  - timeout only stops waiting. It does not cancel the underlying operation
+
+#### TimeoutError
+
+- signature: `new (timeoutMs: number) => TimeoutError`
+- summary: Rejection from timeout when the deadline wins. timeoutMs is the wait that was used. message is 'Timed out after <ms>ms'. Invalid arguments reject with TypeError, not TimeoutError.
+- intents: timeout, error-check
+- examples:
+  - `error instanceof TimeoutError`
+- anti-patterns:
+  - Do not treat TypeError from invalid arguments as a timeout. Only TimeoutError means the deadline won.
