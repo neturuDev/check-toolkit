@@ -81,9 +81,30 @@ describe("cloneDeep", () => {
     const clonedArr = cloneDeep(arr);
     expect(clonedArr[0]).toBe(clonedArr);
   });
+
+  it("copies a __proto__ key as an own property without changing the prototype", () => {
+    const source = JSON.parse('{"__proto__":{"admin":true},"a":{"b":1}}');
+    const cloned = cloneDeep(source);
+    expect(Object.getPrototypeOf(cloned)).toBe(Object.prototype);
+    expect(Object.hasOwn(cloned, "__proto__")).toBe(true);
+    expect(Object.getOwnPropertyDescriptor(cloned, "__proto__")?.value).toEqual({
+      admin: true,
+    });
+    expect(cloned.admin).toBeUndefined();
+    expect(cloned.a).toEqual({ b: 1 });
+    expect(cloned.a).not.toBe(source.a);
+  });
 });
 
 describe("cloneWith (shallow with customizer)", () => {
+  it("copies a __proto__ key as an own property without changing the prototype", () => {
+    const source = JSON.parse('{"__proto__":{"admin":true}}');
+    const cloned = cloneWith(source, () => undefined);
+    expect(Object.getPrototypeOf(cloned)).toBe(Object.prototype);
+    expect(Object.hasOwn(cloned, "__proto__")).toBe(true);
+    expect(cloned.admin).toBeUndefined();
+  });
+
   it("uses customizer for top-level value only (shallow)", () => {
     // top-level customization
     expect(cloneWith(1, () => 2)).toBe(2);
