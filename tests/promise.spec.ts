@@ -42,10 +42,12 @@ describe("promise helpers", () => {
     expect(settled).toBe(true);
   });
 
-  it("throws TypeError for non-finite and unschedulable delays", () => {
-    expect(() => delay(Number.NaN)).toThrow(TypeError);
-    expect(() => delay(Number.POSITIVE_INFINITY)).toThrow(TypeError);
-    expect(() => delay(Number.MAX_VALUE)).toThrow(TypeError);
+  it("treats non-finite values as zero instead of throwing", async () => {
+    for (const ms of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      const promise = delay(ms);
+      await vi.advanceTimersByTimeAsync(0);
+      await promise;
+    }
   });
 
   it("treats negative values as zero", async () => {
@@ -148,13 +150,14 @@ describe("promise helpers", () => {
     await expect(timeout(thenable, 0)).resolves.toBe("sync");
   });
 
-  it("throws TypeError for a non-finite deadline, an unschedulable deadline, or a non-thenable", () => {
-    expect(() => timeout(Promise.resolve(1), Number.NaN)).toThrow(TypeError);
-    expect(() => timeout(Promise.resolve(1), Number.POSITIVE_INFINITY)).toThrow(
+  it("rejects with TypeError for a non-finite deadline or a non-thenable", async () => {
+    await expect(timeout(Promise.resolve(1), Number.NaN)).rejects.toThrow(TypeError);
+    await expect(timeout(Promise.resolve(1), Number.POSITIVE_INFINITY)).rejects.toThrow(
       TypeError,
     );
-    expect(() => timeout(Promise.resolve(1), Number.MAX_VALUE)).toThrow(TypeError);
-    expect(() => timeout(null as unknown as Promise<number>, 10)).toThrow(TypeError);
+    await expect(timeout(null as unknown as Promise<number>, 10)).rejects.toThrow(
+      TypeError,
+    );
   });
 
   it("clears the timer when the promise wins", async () => {

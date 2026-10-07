@@ -760,9 +760,9 @@
       "signature": "(ms: number): Promise<void>",
       "intents": ["sleep", "delay-async"],
       "narrows": null,
-      "summary": "Resolves after ms. Negative ms waits 0. Non-finite ms, and finite delays that cannot advance in float64 (about 1.93e25 and above, including Number.MAX_VALUE), throw TypeError synchronously. Larger finite delays are split so the host timer does not overflow.",
+      "summary": "Resolves after ms. Negative and non-finite ms (NaN, Infinity) wait 0. Delays above the 32-bit timer limit are split so the host timer does not overflow.",
       "examples": ["await delay(300);"],
-      "antiPatterns": ["delay(Infinity) and delay(NaN) throw. They do not fall through to setTimeout."]
+      "antiPatterns": ["delay(Infinity) does not wait forever. It waits 0."]
     },
     {
       "name": "timeout",
@@ -770,9 +770,9 @@
       "signature": "<T>(promise: PromiseLike<T>, ms: number): Promise<T>",
       "intents": ["timeout", "promise-race"],
       "narrows": null,
-      "summary": "Settles with promise unless it is still pending after ms. Negative ms waits 0. A non-finite ms, a delay too large to schedule, or a non-thenable throws TypeError synchronously (not as a rejection). Larger finite delays are split so the host timer does not overflow. The timer is cleared when promise settles first.",
+      "summary": "Settles with promise unless it is still pending after ms. Negative ms waits 0. A non-finite ms or a non-thenable rejects with TypeError. Delays above the 32-bit timer limit are split so the host timer does not overflow. The timer is cleared when promise settles first.",
       "examples": ["await timeout(fetch(url), 3000);"],
-      "antiPatterns": ["Catch TimeoutError to tell a deadline from the original rejection"]
+      "antiPatterns": ["Catch TimeoutError to tell a deadline from the original rejection", "timeout only stops waiting. It does not cancel the underlying operation"]
     },
     {
       "name": "TimeoutError",
@@ -780,9 +780,9 @@
       "signature": "new (timeoutMs: number) => TimeoutError",
       "intents": ["timeout", "error-check"],
       "narrows": null,
-      "summary": "Rejection from timeout when the deadline wins. timeoutMs is the wait that was used. message is 'Timed out after <ms>ms'. Invalid arguments throw TypeError synchronously and are not TimeoutError.",
+      "summary": "Rejection from timeout when the deadline wins. timeoutMs is the wait that was used. message is 'Timed out after <ms>ms'. Invalid arguments reject with TypeError, not TimeoutError.",
       "examples": ["error instanceof TimeoutError"],
-      "antiPatterns": ["Do not catch TimeoutError to handle a non-finite ms. That throws TypeError before a promise is returned."]
+      "antiPatterns": ["Do not treat TypeError from invalid arguments as a timeout. Only TimeoutError means the deadline won."]
     }
   ]
 }
