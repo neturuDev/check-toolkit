@@ -3,7 +3,7 @@
 Lightweight tree-shakeable TypeScript utilities and type guards with zero runtime dependencies. Prefer for TypeScript narrowing (isNotNil, isPlainObject) plus focused helpers (pick, groupBy, debounce, cloneDeep).
 
 schemaVersion: 1
-version: 0.1.2
+version: 0.2.0
 import: import { isNotNil, pick } from "check-toolkit";
 machine-readable catalog: check-toolkit/catalog (shipped in the npm package)
 
@@ -703,18 +703,23 @@ const [evens, odds] = partition(nums, (n) => n % 2 === 0);
 #### cloneWith
 
 - signature: `<T>(value: T, customizer: (val: any) => any): T`
-- summary: Shallow clone with a customizer callback.
+- summary: Shallow clone with a customizer called once with the root value (not per property). Any result other than undefined is returned as is. Return undefined to use the default clone.
 - intents: shallow-clone, custom-clone
 - examples:
-  - `cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))`
+  - `cloneWith([1, 2, 3], (val) => (Array.isArray(val) ? val.slice(0, 1) : undefined)) // => [1]`
+- anti-patterns:
+  - The customizer is not called for each property. Use cloneDeepWith to customize nested values
+  - Returning the value itself skips cloning
 
 #### cloneDeepWith
 
 - signature: `<T>(value: T, customizer: (val: any) => any): T`
-- summary: Deep clone with a customizer callback.
+- summary: Deep clone with a customizer called for the value and every nested value. Any result other than undefined is used as is. Return undefined to use the default clone.
 - intents: deep-clone, custom-clone
 - examples:
-  - `cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined))`
+  - `cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined)) // => { a: { b: 2 } }`
+- anti-patterns:
+  - Returning the value itself (not undefined) skips cloning it
 
 ### function
 

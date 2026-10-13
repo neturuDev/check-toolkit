@@ -102,21 +102,28 @@ export const cloneDeep = <T>(value: T): T => {
 };
 
 /**
- * Creates a shallow clone of `value`, invoking `customizer` for each property.
+ * Creates a shallow clone of `value`.
+ * `customizer` is called once, with `value` itself (not per property). Any result other than
+ * `undefined` is returned as is, without cloning. Return `undefined` to fall back to the default clone.
+ * Use {@link cloneDeepWith} to customize nested values.
  *
  * @example
- * cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))
- * // => { a: 2 }
+ * cloneWith({ a: 1 }, (val) => (Array.isArray(val) ? val.slice(0, 1) : undefined))
+ * // => { a: 1 } (a shallow copy)
+ * cloneWith([1, 2, 3], (val) => (Array.isArray(val) ? val.slice(0, 1) : undefined))
+ * // => [1]
  */
 export const cloneWith = <T>(value: T, customizer: (val: any) => any): T => {
   return baseClone(value, false, customizer);
 };
 
 /**
- * Creates a deep clone of `value`, invoking `customizer` for each property.
+ * Creates a deep clone of `value`, invoking `customizer` for the value and every nested value.
+ * Any result other than `undefined` is used as is, without cloning. Return `undefined` to fall back
+ * to the default clone. Returning the value itself (for example `val`) skips cloning it.
  *
  * @example
- * cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : val))
+ * cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined))
  * // => { a: { b: 2 } }
  */
 export const cloneDeepWith = <T>(
