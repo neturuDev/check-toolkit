@@ -8,7 +8,23 @@ const catalogPath = resolve(root, "ai/catalog.json");
 const indexPath = resolve(root, "lib/index.ts");
 const llmsPath = resolve(root, "ai/llms.txt");
 
-const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
+const packagePath = resolve(root, "package.json");
+
+let catalogSource = readFileSync(catalogPath, "utf8");
+const catalog = JSON.parse(catalogSource);
+
+// Keep the catalog version in sync with package.json (single source of truth).
+const { version: packageVersion } = JSON.parse(readFileSync(packagePath, "utf8"));
+if (catalog.version !== packageVersion) {
+  // Replace only the top-level `"version"` line so the file's formatting stays untouched.
+  catalogSource = catalogSource.replace(
+    /^(\s*"version"\s*:\s*)"[^"]*"/m,
+    `$1${JSON.stringify(packageVersion)}`,
+  );
+  writeFileSync(catalogPath, catalogSource);
+  catalog.version = packageVersion;
+}
+
 const indexSource = readFileSync(indexPath, "utf8");
 
 const exportNames = [

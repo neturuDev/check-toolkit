@@ -44,6 +44,7 @@
   "scripts": {
     "dev": "vite",
     "generate:ai": "node scripts/generate-llms-txt.mjs",
+    "version": "npm run generate:ai && git add ai/catalog.json ai/llms.txt",
     "build": "npm run generate:ai && vite build && tsc",
     "preview": "vite preview",
     "test": "vitest"
