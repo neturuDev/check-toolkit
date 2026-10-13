@@ -1,11 +1,17 @@
 import { OBJECT_TYPES } from "./constants";
 import { baseIsEqual, baseIsMatch, getTag } from "./common";
 
-const ERROR_TAGS = new Set<string>([
-  OBJECT_TYPES.error,
-  OBJECT_TYPES.aggregateError,
-  OBJECT_TYPES.domException,
-]);
+// Standalone constants (not `OBJECT_TYPES` members) so a bundler can drop them with the guards that use them.
+const TAG_DATE = "[object Date]";
+const TAG_REG_EXP = "[object RegExp]";
+const TAG_MAP = "[object Map]";
+const TAG_SET = "[object Set]";
+const TAG_PROMISE = "[object Promise]";
+
+const isErrorTag = (tag: string): boolean =>
+  tag === "[object Error]" ||
+  tag === "[object AggregateError]" ||
+  tag === "[object DOMException]";
 
 const hasMethod = (value: object, key: PropertyKey): boolean =>
   typeof (value as Record<PropertyKey, unknown>)[key] === "function";
@@ -241,7 +247,7 @@ export const isDate = (value: unknown): value is Date => {
   return (
     typeof value === "object" &&
     value !== null &&
-    matchesBrand(value, OBJECT_TYPES.date, "getTime", "Date")
+    matchesBrand(value, TAG_DATE, "getTime", "Date")
   );
 };
 
@@ -262,7 +268,7 @@ export const isRegExp = (value: unknown): value is RegExp => {
   return (
     typeof value === "object" &&
     value !== null &&
-    matchesBrand(value, OBJECT_TYPES.regExp, "test", "RegExp")
+    matchesBrand(value, TAG_REG_EXP, "test", "RegExp")
   );
 };
 
@@ -283,7 +289,7 @@ export const isMap = (value: unknown): value is Map<unknown, unknown> => {
   return (
     typeof value === "object" &&
     value !== null &&
-    matchesBrand(value, OBJECT_TYPES.map, "get", "Map")
+    matchesBrand(value, TAG_MAP, "get", "Map")
   );
 };
 
@@ -304,7 +310,7 @@ export const isSet = (value: unknown): value is Set<unknown> => {
   return (
     typeof value === "object" &&
     value !== null &&
-    matchesBrand(value, OBJECT_TYPES.set, "has", "Set")
+    matchesBrand(value, TAG_SET, "has", "Set")
   );
 };
 
@@ -323,7 +329,7 @@ export const isSet = (value: unknown): value is Set<unknown> => {
 export const isError = (value: unknown): value is Error => {
   if (value instanceof Error) return true;
   if (typeof value !== "object" || value === null) return false;
-  if (!ERROR_TAGS.has(getTag(value))) return false;
+  if (!isErrorTag(getTag(value))) return false;
   if (!prototypeChainHasName(value, "Error")) return false;
 
   const error = value as { name?: unknown; message?: unknown };
@@ -347,7 +353,7 @@ export const isPromise = (value: unknown): value is Promise<unknown> => {
   return (
     typeof value === "object" &&
     value !== null &&
-    matchesBrand(value, OBJECT_TYPES.promise, "then", "Promise")
+    matchesBrand(value, TAG_PROMISE, "then", "Promise")
   );
 };
 
