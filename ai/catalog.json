@@ -681,9 +681,9 @@
       "signature": "<T>(value: T, customizer: (val: any) => any): T",
       "intents": ["shallow-clone", "custom-clone"],
       "narrows": null,
-      "summary": "Shallow clone with a customizer callback.",
-      "examples": ["cloneWith({ a: 1 }, (val) => (typeof val === 'number' ? val * 2 : val))"],
-      "antiPatterns": []
+      "summary": "Shallow clone with a customizer called once with the root value (not per property). Any result other than undefined is returned as is. Return undefined to use the default clone.",
+      "examples": ["cloneWith([1, 2, 3], (val) => (Array.isArray(val) ? val.slice(0, 1) : undefined)) // => [1]"],
+      "antiPatterns": ["The customizer is not called for each property. Use cloneDeepWith to customize nested values", "Returning the value itself skips cloning"]
     },
     {
       "name": "cloneDeepWith",
@@ -691,9 +691,9 @@
       "signature": "<T>(value: T, customizer: (val: any) => any): T",
       "intents": ["deep-clone", "custom-clone"],
       "narrows": null,
-      "summary": "Deep clone with a customizer callback.",
-      "examples": ["cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined))"],
-      "antiPatterns": []
+      "summary": "Deep clone with a customizer called for the value and every nested value. Any result other than undefined is used as is. Return undefined to use the default clone.",
+      "examples": ["cloneDeepWith({ a: { b: 1 } }, (val) => (typeof val === 'number' ? val * 2 : undefined)) // => { a: { b: 2 } }"],
+      "antiPatterns": ["Returning the value itself (not undefined) skips cloning it"]
     },
     {
       "name": "debounce",
