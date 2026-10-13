@@ -24,12 +24,14 @@ describe("common utilities", () => {
   });
 
   describe("ownKeys", () => {
-    it("includes enumerable string keys and symbol keys, excludes non-enumerable strings", () => {
-      const s = Symbol("sym");
+    it("includes only enumerable own string and symbol keys", () => {
+      const visible = Symbol("visible");
+      const hidden = Symbol("hidden");
       const o: any = { a: 1 };
       Object.defineProperty(o, "b", { value: 2, enumerable: false });
-      o[s] = 3;
-      expect(ownKeys(o)).toEqual(["a", s]);
+      o[visible] = 3;
+      Object.defineProperty(o, hidden, { value: 4, enumerable: false });
+      expect(ownKeys(o)).toEqual(["a", visible]);
     });
   });
 

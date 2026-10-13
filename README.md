@@ -46,6 +46,12 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `isString` - Check if value is a string
 - `isBoolean` - Check if value is a boolean
 - `isPlainObject` - Check if value is a plain object
+- `isDate` - Check if value is a Date, including Invalid Date and cross-realm dates
+- `isRegExp` - Check if value is a RegExp
+- `isMap` - Check if value is a Map (`WeakMap` is false)
+- `isSet` - Check if value is a Set (`WeakSet` is false)
+- `isError` - Check if value is an Error, subclass, or DOMException
+- `isPromise` - Check if value is a native Promise (plain thenables are false)
 - `isUndefined` - Check if value is undefined
 - `isNotUndefined` - Check if value is not undefined
 - `isNil` - Check if value is null or undefined
@@ -57,6 +63,7 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Object Operations
 
+- `mapValues` - Maps own enumerable values. The type also lists inherited `keyof` members, which are absent at runtime
 - `pick` - Creates a new object with only the specified keys
 - `omit` - Creates a new object without the specified keys
 - `pickBy` - Creates a new object with entries that satisfy a predicate
@@ -64,6 +71,7 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Array Operations
 
+- `chunk` - Splits an array into chunks of a given size
 - `compact` - Removes falsy values from an array
 - `countBy` - Counts elements grouped by iteratee result
 - `uniq` - Creates an array with unique values
@@ -71,9 +79,15 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 - `groupBy` - Groups array elements by iteratee result
 - `partition` - Splits an array into two groups by predicate
 - `sortBy` - Creates a sorted copy by iteratee result
+- `minBy` - First element with the smallest comparable value
+- `maxBy` - First element with the largest comparable value
+- `sum` - Sums numbers (`NaN` if a present value is not a number)
+- `sumBy` - Sums a numeric iteratee or property, skipping null and undefined
 - `difference` - Create an array of unique values not included in other arrays
-- `differenceBy` - Like difference but accepts iteratee
+- `differenceBy` - Like difference for one `values` array, compared by iteratee
 - `differenceWith` - Like difference but accepts comparator
+- `intersection` - Unique values included in every given array
+- `intersectionBy` - Intersection of `array` and one `values` array, compared by iteratee or property (no rest arrays, unlike `intersection`)
 - `keyBy` - Creates an object composed of keys generated from array
 
 ### String Operations
@@ -108,7 +122,9 @@ const payload = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
 
 ### Promise
 
-- `delay` - Resolves after the specified milliseconds
+- `delay` - Resolves after the specified milliseconds. Negative and non-finite values wait 0; delays above the 32-bit timer limit are handled correctly
+- `timeout` - Settles with a thenable, or rejects with `TimeoutError` if it is still pending after `ms`. Invalid `ms` rejects with `TypeError`. It stops waiting but does not cancel the underlying operation
+- `TimeoutError` - Rejection from `timeout` when the deadline wins, with `timeoutMs`
 
 ## AI / Agent integration
 

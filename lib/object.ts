@@ -1,7 +1,28 @@
-import { hasOwn, ownKeys } from "./common";
+import { hasOwn, ownKeys, setOwn } from "./common";
 
 const getOwnPropertyKeys = <T extends object>(obj: T): (keyof T)[] =>
   ownKeys(obj) as (keyof T)[];
+
+/**
+ * Maps own enumerable string keys and own enumerable symbols.
+ * Inherited properties and non-enumerable keys are omitted. The input object is not mutated.
+ * The return type lists every `keyof T`, including inherited methods. Those keys are absent at runtime unless they are own enumerable properties.
+ *
+ * @example
+ * mapValues({ a: 1, b: 2 }, (value) => value * 2) // => { a: 2, b: 4 }
+ */
+export const mapValues = <T extends object, U>(
+  object: T,
+  iteratee: (value: T[keyof T], key: keyof T) => U,
+): { [K in keyof T]: U } => {
+  const result = {} as { [K in keyof T]: U };
+
+  for (const key of getOwnPropertyKeys(object)) {
+    setOwn(result, key, iteratee(object[key], key));
+  }
+
+  return result;
+};
 
 /**
  * Creates a new object with only the specified keys.
@@ -17,7 +38,7 @@ export const pick = <T extends object, K extends keyof T>(
 
   for (const key of keys) {
     if (hasOwn(obj, key)) {
-      result[key] = obj[key];
+      setOwn(result, key, obj[key]);
     }
   }
 
@@ -39,7 +60,7 @@ export const omit = <T extends object, K extends keyof T>(
 
   for (const key of getOwnPropertyKeys(obj)) {
     if (!exclude.has(key)) {
-      (result as T)[key] = obj[key];
+      setOwn(result, key, obj[key]);
     }
   }
 
@@ -61,7 +82,7 @@ export const pickBy = <T extends object>(
   for (const key of getOwnPropertyKeys(obj)) {
     const value = obj[key];
     if (predicate(value, key)) {
-      result[key] = value;
+      setOwn(result, key, value);
     }
   }
 
