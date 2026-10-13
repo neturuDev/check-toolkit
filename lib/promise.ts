@@ -1,31 +1,20 @@
 /** Largest delay `setTimeout` accepts before a 32-bit overflow (often firing in 1ms). */
 const MAX_TIMER_MS = 2_147_483_647;
 
-const startTimer = (ms: number, onFire: () => void): { clear: () => void } => {
-  let current: ReturnType<typeof setTimeout> | undefined;
-  let cleared = false;
+/** Calls `onFire` after `ms`, splitting delays the host timer cannot hold. Returns a cancel function. */
+const startTimer = (ms: number, onFire: () => void): (() => void) => {
+  let current: ReturnType<typeof setTimeout>;
 
   const arm = (remaining: number) => {
-    const slice = remaining > MAX_TIMER_MS ? MAX_TIMER_MS : remaining;
-    current = setTimeout(() => {
-      if (cleared) return;
-      const next = remaining - slice;
-      if (next > 0) {
-        arm(next);
-        return;
-      }
-      onFire();
-    }, slice);
+    current = setTimeout(
+      remaining > MAX_TIMER_MS ? () => arm(remaining - MAX_TIMER_MS) : onFire,
+      Math.min(remaining, MAX_TIMER_MS),
+    );
   };
 
   arm(ms);
 
-  return {
-    clear() {
-      cleared = true;
-      clearTimeout(current);
-    },
-  };
+  return () => clearTimeout(current);
 };
 
 /**
@@ -86,32 +75,19 @@ export const timeout = <T>(promise: PromiseLike<T>, ms: number): Promise<T> => {
   const wait = Math.max(0, ms);
 
   return new Promise<T>((resolve, reject) => {
-    let settled = false;
-    let clearTimer = () => {};
+    const cancel = startTimer(wait, () => reject(new TimeoutError(wait)));
 
-    const finish = (callback: () => void) => {
-      if (settled) return;
-      settled = true;
-      clearTimer();
-      callback();
-    };
-
-    const timer = startTimer(wait, () => {
-      finish(() => reject(new TimeoutError(wait)));
-    });
-    clearTimer = () => timer.clear();
-
-    try {
-      promise.then(
-        (value) => {
-          finish(() => resolve(value));
-        },
-        (reason: unknown) => {
-          finish(() => reject(reason));
-        },
-      );
-    } catch (error) {
-      finish(() => reject(error));
-    }
+    // Promise.resolve adopts the thenable and turns a throwing `then` into a rejection.
+    // resolve/reject are no-ops once settled, so the loser of the race is ignored.
+    Promise.resolve(promise).then(
+      (value) => {
+        cancel();
+        resolve(value);
+      },
+      (reason: unknown) => {
+        cancel();
+        reject(reason);
+      },
+    );
   });
 };
