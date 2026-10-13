@@ -19,6 +19,7 @@ Do not invent these APIs; they are not part of check-toolkit:
 - curry
 - partial
 - flow
+- flatten
 - flattenDeep
 - zip
 - mapKeys

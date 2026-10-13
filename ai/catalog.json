@@ -15,6 +15,7 @@
     "curry",
     "partial",
     "flow",
+    "flatten",
     "flattenDeep",
     "zip",
     "mapKeys",
