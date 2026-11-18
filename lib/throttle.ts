@@ -1,4 +1,4 @@
-import { debounce, type DebouncedFunction } from "./debounce";
+import { debounce, type DebouncedFunction } from "./debounce.js";
 
 export interface ThrottleOptions {
   leading?: boolean;

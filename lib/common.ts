@@ -1,4 +1,4 @@
-import { OBJECT_TYPES } from "./constants";
+import { OBJECT_TYPES } from "./constants.js";
 
 export const getTag = (v: unknown): string => {
   return Object.prototype.toString.call(v);

@@ -24,7 +24,7 @@ export {
   isEmpty,
   isEqual,
   isMatch,
-} from "./base";
+} from "./base.js";
 
 export {
   chunk,
@@ -45,19 +45,19 @@ export {
   sumBy,
   uniq,
   uniqBy,
-} from "./array";
+} from "./array.js";
 
-export { capitalize, camelCase, kebabCase, snakeCase, startCase, escape, unescape, escapeRegExp } from "./string";
+export { capitalize, camelCase, kebabCase, snakeCase, startCase, escape, unescape, escapeRegExp } from "./string.js";
 
-export { mapValues, pick, omit, pickBy, omitBy } from "./object";
+export { mapValues, pick, omit, pickBy, omitBy } from "./object.js";
 
-export { clone, cloneDeep, cloneWith, cloneDeepWith } from "./clone";
+export { clone, cloneDeep, cloneWith, cloneDeepWith } from "./clone.js";
 
-export { debounce } from "./debounce";
-export { throttle } from "./throttle";
+export { debounce } from "./debounce.js";
+export { throttle } from "./throttle.js";
 
-export { noop, identity, once } from "./function";
+export { noop, identity, once } from "./function.js";
 
-export { clamp } from "./math";
+export { clamp } from "./math.js";
 
-export { delay, timeout, TimeoutError } from "./promise";
+export { delay, timeout, TimeoutError } from "./promise.js";

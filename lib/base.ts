@@ -1,5 +1,5 @@
-import { OBJECT_TYPES } from "./constants";
-import { baseIsEqual, baseIsMatch, getTag } from "./common";
+import { OBJECT_TYPES } from "./constants.js";
+import { baseIsEqual, baseIsMatch, getTag } from "./common.js";
 
 // Standalone constants (not `OBJECT_TYPES` members) so a bundler can drop them with the guards that use them.
 const TAG_DATE = "[object Date]";

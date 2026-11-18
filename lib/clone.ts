@@ -1,4 +1,4 @@
-import { setOwn } from "./common";
+import { setOwn } from "./common.js";
 
 /**
  * Creates a shallow clone of `value`.
