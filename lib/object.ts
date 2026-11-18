@@ -1,4 +1,4 @@
-import { hasOwn, ownKeys, setOwn } from "./common";
+import { hasOwn, ownKeys, setOwn } from "./common.js";
 
 const getOwnPropertyKeys = <T extends object>(obj: T): (keyof T)[] =>
   ownKeys(obj) as (keyof T)[];

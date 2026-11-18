@@ -1,4 +1,4 @@
-import { hasOwn, setOwn } from "./common";
+import { hasOwn, setOwn } from "./common.js";
 
 type Iteratee<T> = ((item: T) => PropertyKey) | keyof T;
 

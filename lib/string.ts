@@ -1,4 +1,4 @@
-import { words } from "./words";
+import { words } from "./words.js";
 
 /**
  * Converts the first character of `string` to upper case. * Lodash-style: only the first character changes; this is not title case.
